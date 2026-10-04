@@ -223,6 +223,103 @@ input:focus-visible {
   to   { transform: scale(1) rotate(-3deg); opacity: 1; }
 }
 
+/* ---------- Streak and penalty ---------- */
+.home-card {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  width: 100%;
+}
+
+.streak-badge {
+  margin: 0;
+  padding: 4px 18px;
+  font-size: 20px;
+  transform: rotate(-1.5deg);
+}
+
+.streak-badge strong {
+  font-size: 28px;
+  color: var(--accent);
+}
+
+.penalty-notice {
+  transform: rotate(0.6deg);
+}
+
+.penalty-notice::before {
+  border-color: var(--loss);
+  border-style: dashed;
+}
+
+.penalty-notice strong,
+.limit-preview {
+  color: var(--loss);
+}
+
+/* ---------- Achievement pop-ups ---------- */
+.popups {
+  position: fixed;
+  top: 18vh;
+  left: 50%;
+  z-index: 10;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.popup {
+  pointer-events: auto;
+  display: grid;
+  gap: 4px;
+  min-width: 260px;
+  padding: 20px 30px;
+  font: inherit;
+  color: var(--ink);
+  text-align: center;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  animation: popup-stamp 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.popup::before {
+  border: 3px double var(--accent);
+  box-shadow: 6px 8px 0 -2px var(--shade-1), 0 0 0 9999px rgba(30, 20, 10, 0.18);
+}
+
+.popup.is-leaving {
+  animation: popup-fade 0.4s ease-in both;
+}
+
+.popup-kicker {
+  font-family: var(--font-head);
+  font-style: italic;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+.popup-title {
+  font-family: var(--font-head);
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+.popup-sub {
+  color: var(--ink-soft);
+}
+
+@keyframes popup-stamp {
+  from { transform: scale(2) rotate(-14deg); opacity: 0; }
+  to   { transform: scale(1) rotate(-3deg); opacity: 1; }
+}
+
+@keyframes popup-fade {
+  from { transform: scale(1) rotate(-3deg); opacity: 1; }
+  to   { transform: scale(0.9) rotate(-3deg) translateY(-20px); opacity: 0; }
+}
+
 /* ---------- Notices ---------- */
 .notice {
   margin-right: auto;

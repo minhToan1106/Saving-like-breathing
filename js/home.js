@@ -22,9 +22,16 @@ window.BY = window.BY || {};
   }
 
   function render(data) {
-    var root = document.getElementById('home-play');
+    var play = document.getElementById('home-play');
     var today = BY.dates.todayKey();
     var day = data.days[today];
+    var streak = BY.rules.currentStreak(data);
+
+    play.innerHTML =
+      '<p class="streak-badge sketch">Streak: <strong id="home-streak">' + streak + '</strong>' +
+        (streak === 1 ? ' day' : ' days') + '</p>' +
+      '<div id="home-card" class="home-card"></div>';
+    var root = play.querySelector('#home-card');
 
     if (!day) {
       renderBet(root, data, today);
@@ -43,7 +50,16 @@ window.BY = window.BY || {};
       return '<button type="button" class="btn stake" data-stake="' + s + '">' + shortMoney(s) + '</button>';
     }).join('');
 
-    root.innerHTML =
+    var penalty = BY.rules.penaltyFor(data, today);
+    var penaltyNotice = penalty
+      ? '<div class="card sketch penalty-notice" id="penalty-notice">' +
+          '<p class="eyebrow">Penalty</p>' +
+          '<p>Because you lost yesterday, you have a penalty today: <strong>' + money(penalty) +
+          '</strong> comes off your spending limit.</p>' +
+        '</div>'
+      : '';
+
+    root.innerHTML = penaltyNotice +
       '<div class="card sketch">' +
         '<p class="bet-sentence">Today I\'ll spend no more than…</p>' +
         '<div class="stakes" role="group" aria-label="Spending limit">' +
@@ -60,6 +76,7 @@ window.BY = window.BY || {};
           '<input id="morning-balance" inputmode="decimal" autocomplete="off" placeholder="e.g. 50.00">' +
           '<p class="field-error" id="morning-error"></p>' +
         '</div>' +
+        '<p class="limit-preview" id="limit-preview" hidden></p>' +
         '<button type="button" class="btn primary" id="confirm-bet" disabled>Lock in the stakes</button>' +
         '<p class="hint" id="bet-hint">Pick your stakes and enter your balance to lock in.</p>' +
       '</div>';
@@ -82,6 +99,12 @@ window.BY = window.BY || {};
         ui.custom && customInput.value.trim() && stake === null ? 'Enter a limit above $0, like 4.50' : '';
       root.querySelector('#morning-error').textContent =
         morningInput.value.trim() && morning === null ? BALANCE_ERROR : '';
+      var preview = root.querySelector('#limit-preview');
+      preview.hidden = !(penalty && stake !== null);
+      if (!preview.hidden) {
+        preview.textContent = 'Your limit today: ' + money(stake) + ' − ' + money(penalty) +
+          ' penalty = ' + money(BY.rules.limitFor(stake, penalty));
+      }
       var ready = stake !== null && morning !== null;
       confirmBtn.disabled = !ready;
       root.querySelector('#bet-hint').hidden = ready;
@@ -110,7 +133,6 @@ window.BY = window.BY || {};
     confirmBtn.addEventListener('click', function () {
       var bet = validate();
       if (!bet) return;
-      var penalty = 0;
       data.days[today] = {
         stake: bet.stake,
         penalty: penalty,
@@ -130,12 +152,19 @@ window.BY = window.BY || {};
     });
   }
 
+  function penaltyLine(day) {
+    return day.penalty
+      ? '<p class="muted">' + money(day.stake) + ' stake − ' + money(day.penalty) + ' penalty from yesterday</p>'
+      : '';
+  }
+
   // ---------- 2. Bet placed, before 7 PM ----------
   function renderWaiting(root, data, today, day) {
     root.innerHTML =
       '<div class="card sketch">' +
         '<p class="eyebrow">Today\'s stakes</p>' +
         '<p class="big-line">Spend no more than <strong>' + money(day.limit) + '</strong></p>' +
+        penaltyLine(day) +
         '<p class="muted">Morning balance: ' + money(day.morningBalance) + '</p>' +
         '<p>Night check-in opens at 7 PM. Come back and settle up.</p>' +
         '<button type="button" class="btn" id="skip-tonight">Skip to tonight <span class="tag">demo</span></button>' +
@@ -155,6 +184,7 @@ window.BY = window.BY || {};
         '<p class="eyebrow">Night check-in</p>' +
         '<p class="big-line">Did you beat yourself?</p>' +
         '<p class="muted">Limit: ' + money(day.limit) + ' · Morning balance: ' + money(day.morningBalance) + '</p>' +
+        penaltyLine(day) +
         '<div class="field">' +
           '<label for="night-balance">Money you have now</label>' +
           '<input id="night-balance" inputmode="decimal" autocomplete="off" placeholder="e.g. 48.00">' +
@@ -183,8 +213,11 @@ window.BY = window.BY || {};
       day.actualSpent = outcome.actualSpent;
       day.result = outcome.result;
       day.saved = outcome.saved;
-      save(data);
       render(data);
+      BY.rules.achievementsFor(data, today).forEach(function (kind) {
+        BY.achievements.show(kind, data);
+      });
+      save(data);
     });
   }
 
@@ -194,11 +227,14 @@ window.BY = window.BY || {};
     root.innerHTML =
       '<div class="card sketch verdict ' + (win ? 'verdict-win' : 'verdict-loss') + '">' +
         '<p class="verdict-word">' + (win ? 'Win' : 'Lose') + '</p>' +
-        '<p class="verdict-line">' + (win ? 'Yesterday\'s you: beaten.' : 'Yesterday\'s you won this one.') + '</p>' +
+        '<p class="verdict-line">' + (win ? 'You beat yourself today.' : 'Yesterday\'s you won this one.') + '</p>' +
         '<p>You spent <strong>' + money(day.actualSpent) + '</strong> against a <strong>' + money(day.limit) + '</strong> limit.</p>' +
         '<p class="muted math">' + money(day.morningBalance) + ' morning + ' + money(day.income) + ' income − ' +
           money(day.nightBalance) + ' tonight = ' + money(day.actualSpent) + ' spent</p>' +
-        '<p class="muted">A new bet opens at midnight.</p>' +
+        (win
+          ? '<p class="muted">Protect your streak. A new bet opens at midnight.</p>'
+          : '<p class="muted">Streak reset to 0. Tomorrow, ' + money(BY.rules.PENALTY) +
+            ' comes off your limit. Think you can win it back?</p>') +
       '</div>';
   }
 

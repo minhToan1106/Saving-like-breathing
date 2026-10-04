@@ -20,6 +20,7 @@
 
   <script src="js/dates.js"></script>
   <script src="js/rules.js"></script>
+  <script src="js/catchup.js"></script>
   <script>
     (function () {
       var R = BY.rules, D = BY.dates;
@@ -80,6 +81,43 @@
       check('Night is closed at 6:59 PM', D.isNightOpen(new Date(2026, 9, 4, 18, 59)), false);
       check('Night opens at 7:00 PM', D.isNightOpen(new Date(2026, 9, 4, 19, 0)), true);
       check('Month key', D.monthKey(new Date(2026, 9, 4)), '2026-10');
+
+      // ---- Penalty (prd.md > Morning Bet) ----
+      function day(result) { return { stake: 300, penalty: 0, limit: 300, result: result }; }
+      check('Day after a loss → $0.50 penalty', R.penaltyFor({ days: { '2026-10-03': day('loss') } }, '2026-10-04'), 50);
+      check('Day after a win → no penalty', R.penaltyFor({ days: { '2026-10-03': day('win') } }, '2026-10-04'), 0);
+      check('First day of use → no penalty', R.penaltyFor({ days: {} }, '2026-10-04'), 0);
+      check('Two losses in a row → still a flat $0.50', R.penaltyFor({ days: { '2026-10-02': day('loss'), '2026-10-03': day('loss') } }, '2026-10-04'), 50);
+
+      // ---- Streak (prd.md > Streaks and Achievements) ----
+      check('No days → streak 0', R.currentStreak({ days: {} }), 0);
+      check('Three wins in a row → streak 3', R.currentStreak({ days: {
+        '2026-10-01': day('win'), '2026-10-02': day('win'), '2026-10-03': day('win') } }), 3);
+      check('A loss resets the streak to 0', R.currentStreak({ days: {
+        '2026-10-01': day('win'), '2026-10-02': day('win'), '2026-10-03': day('loss') } }), 0);
+      check('Wins after a loss count from the loss', R.currentStreak({ days: {
+        '2026-10-01': day('win'), '2026-10-02': day('loss'), '2026-10-03': day('win'), '2026-10-04': day('win') } }), 2);
+      check('Today still open → streak counts up to yesterday', R.currentStreak({ days: {
+        '2026-10-02': day('win'), '2026-10-03': day('win'), '2026-10-04': day(null) } }), 2);
+      check('A win earns the small achievement', R.achievementsFor({ days: { '2026-10-04': day('win') } }, '2026-10-04'), ['win']);
+      check('A loss earns nothing', R.achievementsFor({ days: { '2026-10-04': day('loss') } }, '2026-10-04'), []);
+
+      // ---- Missed check-ins (catch-up on open) ----
+      var missed = { startDate: '2026-10-01', days: {
+        '2026-10-01': day('win'),
+        '2026-10-02': { stake: 300, penalty: 0, limit: 300, morningBalance: 5000, result: null } } };
+      var changed = BY.catchup.run(missed, new Date(2026, 9, 4, 9, 0));
+      check('Catch-up reports a change', changed, true);
+      check('Bet placed but never settled → loss', [missed.days['2026-10-02'].result, missed.days['2026-10-02'].missed], ['loss', true]);
+      check('No bet at all → loss', [missed.days['2026-10-03'].result, missed.days['2026-10-03'].missed], ['loss', true]);
+      check('Today is left open', missed.days['2026-10-04'], undefined);
+      check('Earlier win is untouched', missed.days['2026-10-01'].result, 'win');
+      check('A missed day breaks the streak', R.currentStreak(missed), 0);
+      check('The morning after a missed day has a penalty', R.penaltyFor(missed, '2026-10-04'), 50);
+      check('Running catch-up again changes nothing', BY.catchup.run(missed, new Date(2026, 9, 4, 9, 0)), false);
+      var acrossMonth = { startDate: '2026-09-29', days: {} };
+      BY.catchup.run(acrossMonth, new Date(2026, 9, 2, 9, 0));
+      check('Catch-up crosses a month boundary', Object.keys(acrossMonth.days).sort(), ['2026-09-29', '2026-09-30', '2026-10-01']);
 
       // ---- Show results ----
       var list = document.getElementById('results');

@@ -40,11 +40,46 @@ window.BY = window.BY || {};
     };
   }
 
+  // 50 cents off today if the day before was a loss (including a missed day).
+  // Flat, never stacks, and there's nothing to lose before your first day.
+  var PENALTY = 50;
+
+  function penaltyFor(data, dayKey) {
+    var prev = data.days[BY.dates.addDays(dayKey, -1)];
+    return prev && prev.result === 'loss' ? PENALTY : 0;
+  }
+
+  // Consecutive wins, counting back from the latest settled day.
+  function currentStreak(data) {
+    var settled = Object.keys(data.days)
+      .filter(function (k) { return data.days[k].result; })
+      .sort();
+    if (!settled.length) return 0;
+    var key = settled[settled.length - 1];
+    var streak = 0;
+    while (data.days[key] && data.days[key].result === 'win') {
+      streak++;
+      key = BY.dates.addDays(key, -1);
+    }
+    return streak;
+  }
+
+  // Which pop-ups to show after a day is settled.
+  function achievementsFor(data, dayKey) {
+    var kinds = [];
+    if (data.days[dayKey] && data.days[dayKey].result === 'win') kinds.push('win');
+    return kinds;
+  }
+
   BY.rules = {
+    PENALTY: PENALTY,
     parseMoney: parseMoney,
     formatMoney: formatMoney,
     limitFor: limitFor,
     incomeOn: incomeOn,
-    settleDay: settleDay
+    settleDay: settleDay,
+    penaltyFor: penaltyFor,
+    currentStreak: currentStreak,
+    achievementsFor: achievementsFor
   };
 })(window.BY);

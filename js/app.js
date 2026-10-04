@@ -1,4 +1,4 @@
-// Startup: load the data, then show Home. Loaded last, after every other script.
+// Startup: load the data, catch up on missed days, then show Home. Loaded last, after every other script.
 window.BY = window.BY || {};
 
 (function (BY) {
@@ -12,6 +12,7 @@ window.BY = window.BY || {};
 
   function renderHome() {
     lastView = viewKey();
+    if (BY.catchup.run(BY.state.data) && !BY.storage.saveData(BY.state.data)) showSaveWarning();
     BY.home.render(BY.state.data);
   }
 

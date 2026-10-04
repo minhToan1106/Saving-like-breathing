@@ -19,7 +19,7 @@ Build mode: learn
   Learner check: Double-click `index.html`. Tap $3, type 50 as your morning balance, confirm, tap "Skip to tonight", type 48, and settle. You should see **Win** with $2 spent against a $3 limit. Close the browser, open `index.html` again, and the verdict should still be there. Say whether the look feels like the hand-drawn gothic style you pictured.
   Commit: `Add morning bet and night verdict`
 
-- [ ] **2. Wins and losses have stakes that stick**
+- [x] **2. Wins and losses have stakes that stick**
   Becomes usable: A win raises the streak and stamps a small achievement pop-up. A loss resets the streak to 0, and the next morning shows the "$0.50 penalty" notice and lowers the limit. A day you skip or don't settle counts as a loss when you come back.
   Why now: This finishes the kernel, the part that makes it a bet against yourself rather than a calculator. It's also where the date logic (missed days, new day at midnight) can go wrong, so it gets tested before anything is built on top of it.
   PRD ref: `prd.md > Streaks and Achievements`, `prd.md > Morning Bet` (penalty after a loss), `prd.md > States and Boundaries` (day after a loss, penalty larger than the bet)
@@ -71,7 +71,7 @@ Build mode: learn
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — after slice 2, the full bet → verdict → streak/penalty loop with the base look, while feedback can still shape the Diary, Streaks, and final look
+- [x] Early usable behavior explored — after slice 2, the full bet → verdict → streak/penalty loop with the base look, while feedback can still shape the Diary, Streaks, and final look (done: learners tried win, penalty, and pop-up; worked, no changes requested)
 - [ ] Final kick-the-tires exploration and feedback completed
 
 ## Final Review
