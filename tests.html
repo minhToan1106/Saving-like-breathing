@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rules Check</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; background: #f6f1e6; color: #2a1f16; }
+    li { margin: 4px 0; }
+    .pass { color: #3d6b2a; }
+    .fail { color: #a32a1c; font-weight: bold; }
+    code { font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>Rules check</h1>
+  <p>Runs the PRD examples against <code>js/rules.js</code>. A development aid, not part of the app.</p>
+  <p id="summary"></p>
+  <ul id="results"></ul>
+
+  <script src="js/dates.js"></script>
+  <script src="js/rules.js"></script>
+  <script>
+    (function () {
+      var R = BY.rules, D = BY.dates;
+      var results = [];
+
+      function check(name, actual, expected) {
+        var ok = JSON.stringify(actual) === JSON.stringify(expected);
+        results.push({ name: name, ok: ok, actual: actual, expected: expected });
+      }
+
+      function dataWith(entries) {
+        return { diary: { startingBalance: 0, entries: entries } };
+      }
+
+      // ---- Verdict (prd.md > Night Check-in and Verdict) ----
+      var a = R.settleDay(5000, 10000, 13000, 300);
+      check('Morning $50 + income $100 − night $130 = $20 spent', a.actualSpent, 2000);
+      check('… at a $3 limit → Lose', a.result, 'loss');
+      check('… a loss saves nothing', a.saved, 0);
+
+      var b = R.settleDay(5000, 0, 4800, 300);
+      check('Morning $50 − night $48 = $2 spent', b.actualSpent, 200);
+      check('… at a $3 limit → Win', b.result, 'win');
+      check('… saves the unspent $1', b.saved, 100);
+
+      check('Spending exactly the limit is a win', R.settleDay(5000, 0, 4700, 300).result, 'win');
+      check('Higher night balance with no income counts as $0 spent', R.settleDay(5000, 0, 5200, 300).actualSpent, 0);
+      check('… and is a win', R.settleDay(5000, 0, 5200, 300).result, 'win');
+
+      // ---- Limits (prd.md > Morning Bet, States and Boundaries) ----
+      check('$3 tap after a loss → $2.50 limit', R.limitFor(300, 50), 250);
+      check('$0.50 custom bet with a penalty → $0 limit', R.limitFor(50, 50), 0);
+      check('No penalty keeps the stake', R.limitFor(1000, 0), 1000);
+
+      // ---- Income from the diary ----
+      var diary = dataWith([
+        { date: '2026-10-04', type: 'income', amount: 10000 },
+        { date: '2026-10-04', type: 'spending', amount: 400 },
+        { date: '2026-10-03', type: 'income', amount: 2500 },
+        { date: '2026-10-04', type: 'income', amount: 150 }
+      ]);
+      check('Income today sums only today\'s income entries', R.incomeOn(diary, '2026-10-04'), 10150);
+      check('No entries → $0 income', R.incomeOn(dataWith([]), '2026-10-04'), 0);
+
+      // ---- Money input ----
+      check('"48.50" → 4850 cents', R.parseMoney('48.50'), 4850);
+      check('"$3" → 300 cents', R.parseMoney('$3'), 300);
+      check('" 0.1 " → 10 cents', R.parseMoney(' 0.1 '), 10);
+      check('"" is invalid', R.parseMoney(''), null);
+      check('"abc" is invalid', R.parseMoney('abc'), null);
+      check('"-5" is invalid', R.parseMoney('-5'), null);
+      check('"4.505" is invalid', R.parseMoney('4.505'), null);
+      check('250 cents shows as $2.50', R.formatMoney(250), '$2.50');
+
+      // ---- Dates ----
+      check('Day after Oct 31 is Nov 1', D.addDays('2026-10-31', 1), '2026-11-01');
+      check('Day before Mar 1 is Feb 28', D.addDays('2026-03-01', -1), '2026-02-28');
+      check('Night is closed at 6:59 PM', D.isNightOpen(new Date(2026, 9, 4, 18, 59)), false);
+      check('Night opens at 7:00 PM', D.isNightOpen(new Date(2026, 9, 4, 19, 0)), true);
+      check('Month key', D.monthKey(new Date(2026, 9, 4)), '2026-10');
+
+      // ---- Show results ----
+      var list = document.getElementById('results');
+      var failed = 0;
+      results.forEach(function (r) {
+        var li = document.createElement('li');
+        li.className = r.ok ? 'pass' : 'fail';
+        li.textContent = (r.ok ? 'PASS  ' : 'FAIL  ') + r.name +
+          (r.ok ? '' : '  (got ' + JSON.stringify(r.actual) + ', expected ' + JSON.stringify(r.expected) + ')');
+        list.appendChild(li);
+        if (!r.ok) failed++;
+      });
+      var summary = document.getElementById('summary');
+      summary.textContent = (results.length - failed) + ' passed, ' + failed + ' failed';
+      summary.className = failed ? 'fail' : 'pass';
+      summary.dataset.passed = results.length - failed;
+      summary.dataset.failed = failed;
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat Yourself Scope</title>
+<style>
+:root{
+  --bg:#f6f5f1; --surface:#ffffff; --ink:#1d1d1f; --muted:#5d5d66; --line:#dcdad3;
+  --accent:#d9480f; --accent-soft:#fff0e6; --win:#2b8a3e; --win-soft:#e9f7ec;
+  --lose:#c92a2a; --lose-soft:#fdecec; --night:#3b4cca; --night-soft:#eceefd;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141416; --surface:#1e1e22; --ink:#ececf0; --muted:#a3a3ad; --line:#34343a;
+    --accent:#ff8a4c; --accent-soft:#3a2418; --win:#69db7c; --win-soft:#1c3122;
+    --lose:#ff8787; --lose-soft:#3a1d1d; --night:#9aa5ff; --night-soft:#23264a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141416; --surface:#1e1e22; --ink:#ececf0; --muted:#a3a3ad; --line:#34343a;
+  --accent:#ff8a4c; --accent-soft:#3a2418; --win:#69db7c; --win-soft:#1c3122;
+  --lose:#ff8787; --lose-soft:#3a1d1d; --night:#9aa5ff; --night-soft:#23264a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:40px 16px 80px}
+.tag{display:inline-block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:3px 10px;border-radius:99px;font-weight:600}
+h1{font-size:clamp(30px,6vw,46px);line-height:1.1;margin:14px 0 8px}
+h2{font-size:22px;margin:0 0 10px}
+.lede{font-size:18px;color:var(--muted);margin:0 0 28px}
+.hook{font-size:clamp(20px,4vw,28px);font-weight:700;text-align:center;padding:28px 16px;border:2px dashed var(--accent);border-radius:16px;background:var(--accent-soft);margin:0 0 28px}
+section{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;margin:0 0 18px}
+p{margin:0 0 10px}
+.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.grid section{margin:0}
+svg{width:100%;height:auto;display:block}
+.svg-box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.svg-t{fill:var(--ink);font:600 15px system-ui,sans-serif}
+.svg-s{fill:var(--muted);font:13px system-ui,sans-serif}
+.arrow{stroke:var(--muted);stroke-width:2;fill:none}
+/* stepper */
+.steps{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.steps button{flex:1 1 120px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+.steps button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.screen{border:1px solid var(--line);border-radius:12px;padding:18px;background:var(--bg);min-height:150px}
+.screen h3{margin:0 0 8px;font-size:17px}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:13px;font-weight:600}
+.pill.win{background:var(--win-soft);color:var(--win)}
+.pill.lose{background:var(--lose-soft);color:var(--lose)}
+.pill.night{background:var(--night-soft);color:var(--night)}
+details{border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:0 0 10px;background:var(--bg)}
+summary{cursor:pointer;font-weight:700}
+details ul{margin:10px 0 0;padding-left:20px}
+details li{margin:0 0 6px}
+.now summary{color:var(--win)} .later summary{color:var(--night)} .cut summary{color:var(--lose)}
+a{color:var(--accent)}
+footer{color:var(--muted);font-size:14px;text-align:center;margin-top:30px}
+</style>
+</head>
+<body>
+<main>
+  <span class="tag">Scope · Approved</span>
+  <h1>Beat Yourself <span class="muted" style="font-size:.5em;font-weight:500">(working title)</span></h1>
+  <p class="lede">A web app where students bet on their own spending each morning and settle up each night, competing against their past selves instead of just logging numbers.</p>
+
+  <div class="hook">“Do you think you can beat yourself?”</div>
+
+  <section>
+    <h2>The unique kernel</h2>
+    <p><strong>A daily bet against yourself, with stakes that sting.</strong> Commit in the morning, settle at night. Win and keep your streak plus an achievement. Lose and your streak resets to zero, and tomorrow's stakes get harder. The opponent is always “yesterday's you,” which keeps it fair for everyone, whatever their income.</p>
+  </section>
+
+  <section>
+    <h2>The core loop: two visits a day</h2>
+    <svg viewBox="0 0 760 330" role="img" aria-labelledby="loopTitle">
+      <title id="loopTitle">Daily loop: the morning bet leads to the night settle-up. A win means keep the streak and earn an achievement. A loss resets the streak and means harder stakes tomorrow. Both lead back to the next morning.</title>
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="currentColor" style="color:var(--muted)"/></marker></defs>
+      <!-- morning -->
+      <rect x="20" y="110" width="200" height="100" rx="14" class="svg-box" style="stroke:var(--accent)"/>
+      <text x="120" y="145" text-anchor="middle" class="svg-t">☀️ Morning</text>
+      <text x="120" y="168" text-anchor="middle" class="svg-s">Pick bet + tap stake</text>
+      <text x="120" y="187" text-anchor="middle" class="svg-s">Enter balance</text>
+      <!-- night -->
+      <rect x="280" y="110" width="200" height="100" rx="14" class="svg-box" style="stroke:var(--night)"/>
+      <text x="380" y="145" text-anchor="middle" class="svg-t">🌙 Night (~10 PM)</text>
+      <text x="380" y="168" text-anchor="middle" class="svg-s">Enter balance</text>
+      <text x="380" y="187" text-anchor="middle" class="svg-s">App gives verdict</text>
+      <!-- win -->
+      <rect x="540" y="20" width="200" height="90" rx="14" class="svg-box" style="stroke:var(--win)"/>
+      <text x="640" y="56" text-anchor="middle" class="svg-t" style="fill:var(--win)">🏆 Win</text>
+      <text x="640" y="80" text-anchor="middle" class="svg-s">Streak +1, achievement</text>
+      <!-- lose -->
+      <rect x="540" y="210" width="200" height="90" rx="14" class="svg-box" style="stroke:var(--lose)"/>
+      <text x="640" y="246" text-anchor="middle" class="svg-t" style="fill:var(--lose)">💢 Lose</text>
+      <text x="640" y="268" text-anchor="middle" class="svg-s">Streak resets to 0</text>
+      <text x="640" y="287" text-anchor="middle" class="svg-s">Harder stakes: $3 → $2.50</text>
+      <!-- arrows -->
+      <path d="M220 160 H274" class="arrow" marker-end="url(#ah)"/>
+      <text x="247" y="150" text-anchor="middle" class="svg-s">skip to</text>
+      <path d="M480 140 L536 75" class="arrow" marker-end="url(#ah)"/>
+      <path d="M480 180 L536 245" class="arrow" marker-end="url(#ah)"/>
+      <path d="M640 20 V8 H120 V104" class="arrow" marker-end="url(#ah)" stroke-dasharray="5 5"/>
+      <path d="M640 300 V322 H120 V216" class="arrow" marker-end="url(#ah)" stroke-dasharray="5 5"/>
+      <text x="380" y="4" text-anchor="middle" class="svg-s" dy="14">next morning</text>
+      <text x="380" y="316" text-anchor="middle" class="svg-s">next morning, tougher</text>
+    </svg>
+  </section>
+
+  <section>
+    <h2>What “working” looks like: the 1-minute demo</h2>
+    <p class="muted">Step through the demo video exactly as planned.</p>
+    <div class="steps" role="tablist">
+      <button role="tab" aria-selected="true" data-i="0">1 · Hook</button>
+      <button role="tab" aria-selected="false" data-i="1">2 · Morning bet</button>
+      <button role="tab" aria-selected="false" data-i="2">3 · Skip to tonight</button>
+      <button role="tab" aria-selected="false" data-i="3">4a · Win</button>
+      <button role="tab" aria-selected="false" data-i="4">4b · Lose</button>
+    </div>
+    <div class="screen" id="screen" aria-live="polite"></div>
+  </section>
+
+  <div class="grid">
+    <section>
+      <h2>Who it's for</h2>
+      <p>Students like us who run short of money by the end of the month, usually because of impulse buys. Typing numbers into a tracker “would be too boring,” and for many of them even just logging in is a big ask.</p>
+    </section>
+    <section>
+      <h2>Why it matters to us</h2>
+      <p>It's our own problem, and we think lots of people share it. As a team of two, we also want to learn “how to work with an AI agent.”</p>
+    </section>
+  </div>
+  <div style="height:18px"></div>
+
+  <section>
+    <h2>Inspiration &amp; identity</h2>
+    <p><a href="https://cssbattle.dev/">CSS Battle</a>: a normal website, clean and competitive, with one challenge front and center. The game energy of Valorant, TFT and Arena of Valor, and instant dopamine on a win. It should leave users salty, curious or thrilled. The word is <strong>“stakes,”</strong> never “gambling.”</p>
+  </section>
+
+  <section>
+    <h2>The boundary</h2>
+    <details class="now" open>
+      <summary>✅ Now: in the proof of concept</summary>
+      <ul>
+        <li>Morning check-in: choose the bet type (“spend no more than $X” or “end with at least $Y”), tap a stake amount, enter the balance.</li>
+        <li>Night check-in: enter the balance, get a win/lose verdict from the balance check.</li>
+        <li>Win → streak and achievement. Lose → streak resets, and the next day's stakes get harder.</li>
+        <li>A “Skip to tonight” demo button so a whole day fits in the video.</li>
+        <li>One user on one device. Nothing social.</li>
+      </ul>
+    </details>
+    <details class="later">
+      <summary>⏳ Later: worth doing, not now</summary>
+      <ul>
+        <li>Real 10 PM notifications (browser notifications are tricky, and the demo can't wait until 10 PM).</li>
+        <li>Leaderboards and rankings among users.</li>
+        <li>Connecting with friends and referrals.</li>
+        <li>Exercise penalty (pushups) for losses.</li>
+        <li>A bigger achievement collection, with bad achievements to earn back.</li>
+      </ul>
+    </details>
+    <details class="cut">
+      <summary>✂️ Cut, with reasons</summary>
+      <ul>
+        <li><strong>Charging $1 per failure:</strong> it punishes students who are already short on money, and the app would profit when users fail.</li>
+        <li><strong>Gambling and addiction framing:</strong> an ethical and legal red flag for this audience. We kept the stakes and dropped the gambling.</li>
+        <li><strong>Cheat-proof verification (bank connections):</strong> far beyond a 2–4 hour build. It runs on the honor system, and cheating only means losing to yourself.</li>
+      </ul>
+    </details>
+  </section>
+
+  <footer>Companion to <code>devpost/scope.md</code>, which is the official version.</footer>
+</main>
+<script>
+const screens=[
+  `<h3>Opening the app</h3><p style="font-size:20px;font-weight:700">“Do you think you can beat yourself?”</p><p class="muted">The hook that makes you salty, curious or thrilled.</p>`,
+  `<h3>☀️ Morning: set the stakes</h3><p>Pick a bet: <strong>“I'll spend no more than $X”</strong> or <strong>“I'll end the day with at least $Y.”</strong></p><p>Tap an amount (e.g. <strong>$3</strong>), then enter your current balance.</p>`,
+  `<h3><span class="pill night">Demo button</span> Skip to tonight</h3><p>🌙 Enter your night balance. The app compares it with your morning balance and decides whether you beat yourself.</p>`,
+  `<h3><span class="pill win">You won</span></h3><p>🔥 Streak +1 and 🏆 an achievement pops up. This is the “oh, that's cool” beat.</p>`,
+  `<h3><span class="pill lose">You lost</span></h3><p>💔 Your streak resets to 0, and tomorrow's stakes level up: your <strong>$3</strong> bet becomes <strong>$2.50</strong>. Can you win it back?</p>`
+];
+const btns=document.querySelectorAll('.steps button'),scr=document.getElementById('screen');
+function show(i){btns.forEach(b=>b.setAttribute('aria-selected',b.dataset.i==i));scr.innerHTML=screens[i];}
+btns.forEach(b=>b.addEventListener('click',()=>show(b.dataset.i)));
+show(0);
+</script>
+</body>
+</html>

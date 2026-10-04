@@ -1,0 +1,91 @@
+/* Fonts, colors, paper texture and wobbly hand-drawn edges.
+   Every color is a variable, so the day/night toggle can swap the whole look. */
+
+:root,
+[data-theme="day"] {
+  --paper: #e9dcc0;
+  --paper-deep: #d6c29c;
+  --card: #f3e8cf;
+  --ink: #2a1f16;
+  --ink-soft: #5e4a35;
+  --accent: #8b3a1e;
+  --on-ink: #f3e8cf;
+  --shade-1: rgba(70, 45, 20, 0.22);
+  --shade-2: rgba(70, 45, 20, 0.12);
+  --win: #5f7d45;
+  --loss: #9e3a2c;
+  --none: #b3a68f;
+  --grain-opacity: 0.55;
+}
+
+:root {
+  --font-head: "IM Fell English", Georgia, serif;
+  --font-body: "Patrick Hand", "Comic Sans MS", cursive;
+  /* Irregular corners so no two match */
+  --rough-a: 255px 18px 225px 16px / 16px 225px 18px 255px;
+  --rough-b: 18px 225px 16px 255px / 225px 16px 255px 18px;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 19px;
+  line-height: 1.4;
+}
+
+/* Paper grain plus darker, pencil-shaded edges */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: var(--grain-opacity);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .22 0 0 0 0 .14 0 0 0 0 .06 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  box-shadow: inset 0 0 120px 30px var(--shade-1), inset 0 0 40px 6px var(--shade-2);
+}
+
+h1, h2, h3,
+.brand {
+  font-family: var(--font-head);
+  font-weight: 400;
+}
+
+.svg-defs {
+  position: absolute;
+}
+
+/* A sketched box: the border and fill sit on a wobbled layer behind the content,
+   so the edges look hand-drawn but the text stays crisp. */
+.sketch {
+  position: relative;
+  isolation: isolate;
+}
+
+.sketch::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: var(--rough-a);
+  filter: url(#wobble);
+  box-shadow:
+    3px 4px 0 -1px var(--shade-1),
+    inset 0 0 18px var(--shade-2),
+    inset -6px -8px 0 -4px var(--shade-2);
+}

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en" data-theme="day">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beat Yourself</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Patrick+Hand&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <!-- Hand-drawn edges: borders and buttons use filter: url(#wobble) -->
+  <svg class="svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <filter id="wobble" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <div class="shell">
+    <nav class="sidebar" aria-label="Main">
+      <p class="brand">Beat<br>Yourself</p>
+      <ul class="nav-list">
+        <li><button type="button" class="nav-link is-active" data-screen="home">Home</button></li>
+        <li><button type="button" class="nav-link" data-screen="diary" disabled>Diary <span class="soon">soon</span></button></li>
+        <li><button type="button" class="nav-link" data-screen="streaks" disabled>Streaks <span class="soon">soon</span></button></li>
+      </ul>
+    </nav>
+
+    <div class="main">
+      <header class="topbar">
+        <div id="notice" class="notice" hidden></div>
+        <div id="theme-slot" class="theme-slot"></div>
+      </header>
+
+      <section id="screen-home" class="screen is-active" aria-labelledby="hook">
+        <div class="home-top">
+          <h1 id="hook" class="hook">Do you think you can<br>beat yourself?</h1>
+        </div>
+        <div id="home-play" class="home-play"></div>
+      </section>
+
+      <section id="screen-diary" class="screen" hidden></section>
+      <section id="screen-streaks" class="screen" hidden></section>
+    </div>
+  </div>
+
+  <div id="popups" class="popups" aria-live="polite"></div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/dates.js"></script>
+  <script src="js/rules.js"></script>
+  <script src="js/home.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

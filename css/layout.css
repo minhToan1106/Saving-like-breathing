@@ -1,0 +1,107 @@
+/* Sidebar on the left, the main area on the right, one screen visible at a time. */
+
+.shell {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  padding: 28px 18px;
+  border-right: 2px solid var(--ink);
+  filter: url(#wobble);
+}
+
+.brand {
+  margin: 0 0 28px;
+  font-size: 30px;
+  line-height: 1.05;
+  color: var(--accent);
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 16px 24px 0;
+  min-height: 44px;
+}
+
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0 24px 40px;
+}
+
+.screen[hidden] {
+  display: none;
+}
+
+/* Home: the hook fills the top half, the bet sits in the bottom half */
+.home-top {
+  min-height: 34vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.home-play {
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+}
+
+@media (max-width: 720px) {
+  html, body { font-size: 17px; }
+
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    border-right: 0;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .brand {
+    margin: 0;
+    font-size: 22px;
+  }
+
+  .nav-list {
+    grid-auto-flow: column;
+  }
+
+  .topbar,
+  .screen {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .home-top {
+    min-height: 24vh;
+  }
+}

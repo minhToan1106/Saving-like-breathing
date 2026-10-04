@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat Yourself Spec</title>
+<style>
+:root{
+  --bg:#efe6d2; --paper:#f8f1e1; --ink:#2b2118; --muted:#6b5a47; --line:#8a7358;
+  --accent:#8b3a1e; --accent-soft:#f1dccb; --win:#4f7a3a; --win-soft:#dfe8cf;
+  --lose:#9e2f24; --lose-soft:#f2d6cf; --gray:#b9ab95; --hi:#f6d58a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16120e; --paper:#221c16; --ink:#eadfca; --muted:#b3a28a; --line:#6e5b45;
+    --accent:#e08a5c; --accent-soft:#3a2418; --win:#93c47d; --win-soft:#24301c;
+    --lose:#e8857a; --lose-soft:#3a1d1a; --gray:#5a4e40; --hi:#5a4318;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16120e; --paper:#221c16; --ink:#eadfca; --muted:#b3a28a; --line:#6e5b45;
+  --accent:#e08a5c; --accent-soft:#3a2418; --win:#93c47d; --win-soft:#24301c;
+  --lose:#e8857a; --lose-soft:#3a1d1a; --gray:#5a4e40; --hi:#5a4318;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Georgia,"Times New Roman",serif}
+main{max-width:900px;margin:0 auto;padding:36px 16px 80px}
+.tag{display:inline-block;font:600 12px/1 system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:5px 10px;border-radius:3px}
+h1{font-size:clamp(30px,6vw,46px);line-height:1.1;margin:14px 0 6px}
+h2{font-size:23px;margin:44px 0 10px;border-bottom:2px dashed var(--line);padding-bottom:6px}
+h3{margin:0 0 6px;font-size:18px}
+p.lede{color:var(--muted);font-size:18px;margin:0}
+.card{background:var(--paper);border:2px solid var(--line);border-radius:6px 14px 8px 12px/12px 6px 14px 8px;padding:16px 18px;margin:12px 0;box-shadow:3px 3px 0 var(--line)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}}
+.small{font-size:14px;color:var(--muted)}
+code{font:14px ui-monospace,Consolas,monospace;background:var(--accent-soft);padding:1px 5px;border-radius:3px}
+svg{max-width:100%;height:auto;display:block}
+.btn{font:600 14px system-ui,sans-serif;background:var(--paper);color:var(--ink);border:2px solid var(--line);padding:7px 14px;border-radius:5px 10px 6px 9px;cursor:pointer}
+.btn[aria-pressed="true"],.btn[aria-selected="true"]{background:var(--accent);color:var(--paper);border-color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+/* diagram */
+.node rect{fill:var(--paper);stroke:var(--line);stroke-width:2}
+.node text{fill:var(--ink);font:600 13px system-ui,sans-serif}
+.node .sub{fill:var(--muted);font:12px ui-monospace,Consolas,monospace}
+.node.on rect{fill:var(--hi);stroke:var(--accent);stroke-width:3}
+.edge{stroke:var(--line);stroke-width:2;fill:none}
+.edge.on{stroke:var(--accent);stroke-width:3}
+.elabel{fill:var(--muted);font:11px system-ui,sans-serif}
+/* stepper */
+.step-body{min-height:150px}
+.step-num{font:700 12px system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.files{margin-top:8px}
+.files code{display:inline-block;margin:2px 4px 2px 0}
+/* tree */
+pre.tree{background:var(--paper);border:2px solid var(--line);border-radius:6px;padding:14px;overflow-x:auto;font:13px/1.55 ui-monospace,Consolas,monospace;margin:0}
+pre.tree .f{color:var(--accent);font-weight:700}
+pre.tree .c{color:var(--muted)}
+.comp{display:none}.comp.on{display:block}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px dashed var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{font:700 12px system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tblwrap{overflow-x:auto}
+.decide li{margin:4px 0}
+.pill{font:600 11px system-ui,sans-serif;padding:2px 7px;border-radius:9px;margin-right:6px;white-space:nowrap}
+.pill.team{background:var(--win-soft);color:var(--win)}
+.pill.agent{background:var(--accent-soft);color:var(--accent)}
+.daygrid{display:grid;grid-template-columns:repeat(7,18px);gap:4px;margin:8px 0}
+.daygrid span{width:18px;height:18px;border-radius:3px;border:1px solid var(--line)}
+.w{background:var(--win)}.l{background:var(--lose)}.g{background:var(--gray)}
+.toggle{position:fixed;top:12px;right:12px}
+</style>
+</head>
+<body>
+<button class="btn toggle" id="themeBtn" type="button">Day / Night</button>
+<main>
+  <span class="tag">4-spec · approved</span>
+  <h1>Beat Yourself — Technical Spec</h1>
+  <p class="lede">One web page of plain HTML, CSS and JavaScript. Double-click <code>index.html</code>. No server, no install, no account. The full text is in <code>devpost/spec.md</code>, which is the official version.</p>
+
+  <h2>The whole system on one page</h2>
+  <p class="small">Pick a step of the journey below and the pieces it uses light up here.</p>
+  <div class="card">
+  <svg id="arch" viewBox="0 0 760 360" role="img" aria-label="Architecture: screens call rules and storage; storage writes localStorage; app.js runs catch-up on open">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="currentColor" style="color:var(--line)"/></marker></defs>
+    <!-- edges -->
+    <path class="edge" data-e="user-screens" d="M380 52 V86" marker-end="url(#ar)"/>
+    <path class="edge" data-e="screens-rules" d="M500 128 H560" marker-end="url(#ar)"/>
+    <path class="edge" data-e="screens-storage" d="M330 150 V214" marker-end="url(#ar)"/>
+    <path class="edge" data-e="storage-ls" d="M380 258 V292" marker-end="url(#ar)"/>
+    <path class="edge" data-e="app-catchup" d="M130 128 V214" marker-end="url(#ar)"/>
+    <path class="edge" data-e="catchup-storage" d="M200 236 H258" marker-end="url(#ar)"/>
+    <path class="edge" data-e="app-screens" d="M200 108 H258" marker-end="url(#ar)"/>
+    <path class="edge" data-e="screens-pop" d="M500 145 C540 170 560 210 580 222" marker-end="url(#ar)"/>
+    <text class="elabel" x="336" y="190">saveData / loadData</text>
+    <text class="elabel" x="505" y="120">ask: who won?</text>
+    <!-- nodes -->
+    <g class="node" data-n="user"><rect x="300" y="10" width="160" height="42" rx="8"/><text x="380" y="36" text-anchor="middle">You: tap / type</text></g>
+    <g class="node" data-n="screens"><rect x="260" y="88" width="240" height="62" rx="8"/><text x="380" y="112" text-anchor="middle">Screens</text><text class="sub" x="380" y="134" text-anchor="middle">home.js · diary.js · streaks.js</text></g>
+    <g class="node" data-n="rules"><rect x="562" y="98" width="180" height="58" rx="8"/><text x="652" y="120" text-anchor="middle">Rules (the brain)</text><text class="sub" x="652" y="142" text-anchor="middle">rules.js · dates.js</text></g>
+    <g class="node" data-n="app"><rect x="20" y="86" width="180" height="42" rx="8"/><text x="110" y="104" text-anchor="middle">Startup</text><text class="sub" x="110" y="120" text-anchor="middle">app.js · theme.js</text></g>
+    <g class="node" data-n="catchup"><rect x="20" y="216" width="180" height="42" rx="8"/><text x="110" y="234" text-anchor="middle">Catch-up on open</text><text class="sub" x="110" y="250" text-anchor="middle">catchup.js</text></g>
+    <g class="node" data-n="storage"><rect x="260" y="216" width="240" height="42" rx="8"/><text x="380" y="234" text-anchor="middle">Storage (only door to memory)</text><text class="sub" x="380" y="250" text-anchor="middle">storage.js</text></g>
+    <g class="node" data-n="pop"><rect x="562" y="216" width="180" height="42" rx="8"/><text x="652" y="234" text-anchor="middle">Achievement pop-ups</text><text class="sub" x="652" y="250" text-anchor="middle">achievements.js</text></g>
+    <g class="node" data-n="ls"><rect x="260" y="294" width="240" height="50" rx="8" stroke-dasharray="6 4"/><text x="380" y="316" text-anchor="middle">localStorage</text><text class="sub" x="380" y="334" text-anchor="middle">this browser, this device</text></g>
+  </svg>
+  </div>
+
+  <h2>Walk the core journey</h2>
+  <p class="small">Traces <code>prd.md &gt; The Core Journey</code> through the pieces.</p>
+  <div class="row" id="stepBtns" role="tablist"></div>
+  <div class="card step-body" id="stepBody" aria-live="polite"></div>
+  <div class="row"><button class="btn" id="prev" type="button">← Back</button><button class="btn" id="next" type="button">Next →</button></div>
+
+  <h2>The verdict, as the code will do it</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Rules in <code>rules.js</code></h3>
+      <p><b>limit</b> = max(0, stake − penalty)<br>
+      <b>penalty</b> = $0.50 if yesterday was a loss, else $0<br>
+      <b>actual spent</b> = max(0, morning + income today − night)<br>
+      <b>Win</b> if actual spent ≤ limit → saved += limit − actual spent</p>
+      <p class="small">All money is stored in cents (300 = $3.00), so $3.00 − $0.50 is always exactly $2.50. A <code>tests.html</code> page checks the PRD's examples with PASS/FAIL.</p>
+    </div>
+    <div class="card">
+      <h3>Catch-up when the app opens</h3>
+      <p class="small">Bet Monday, forgot to settle, opened Wednesday:</p>
+      <div class="daygrid" aria-label="Example grid: wins, then two red missed days"><span class="w"></span><span class="w"></span><span class="w"></span><span class="l"></span><span class="l"></span><span class="g" style="outline:2px solid var(--accent)"></span></div>
+      <p class="small">Mon → loss (not settled) · Tue → loss (no bet) · streak 0 · today shows the $0.50 penalty notice. A new month resets savings in the same check. Night opens at <b>7 PM</b>.</p>
+    </div>
+  </div>
+
+  <h2>Components</h2>
+  <div class="row" id="compBtns" role="tablist"></div>
+  <div class="card" id="compBox"></div>
+
+  <h2>Files</h2>
+<pre class="tree">Build AI Basic/
+├── <span class="f">index.html</span>          <span class="c"># the whole app: sidebar, toggle, 3 screens, pop-ups, SVG filters</span>
+├── <span class="f">tests.html</span>          <span class="c"># rules check page: PRD examples → PASS/FAIL</span>
+├── css/
+│   ├── <span class="f">theme.css</span>       <span class="c"># fonts, day/night colors, paper texture, wobble edges</span>
+│   ├── <span class="f">layout.css</span>      <span class="c"># sidebar + screens, narrow-screen layout</span>
+│   └── <span class="f">components.css</span>  <span class="c"># buttons, cards, grid squares, pop-ups, hook drop</span>
+├── js/                 <span class="c"># loaded in this order ↓</span>
+│   ├── <span class="f">storage.js</span>      <span class="c"># ONLY file touching localStorage</span>
+│   ├── <span class="f">dates.js</span>        <span class="c"># today, month, 7 PM check</span>
+│   ├── <span class="f">rules.js</span>        <span class="c"># the math: penalty, limit, settle, streak</span>
+│   ├── <span class="f">catchup.js</span>      <span class="c"># missed days → losses, new month → reset</span>
+│   ├── <span class="f">achievements.js</span> <span class="c"># pop-up queue</span>
+│   ├── <span class="f">theme.js</span>        <span class="c"># day/night toggle</span>
+│   ├── <span class="f">home.js</span>         <span class="c"># hook, bet, goal, night, verdict, demo buttons</span>
+│   ├── <span class="f">diary.js</span>        <span class="c"># balance, entries</span>
+│   ├── <span class="f">streaks.js</span>      <span class="c"># streak + grid</span>
+│   └── <span class="f">app.js</span>          <span class="c"># startup + sidebar (last)</span>
+├── <span class="f">README.md</span>           <span class="c"># how to run, reset, demo steps</span>
+└── devpost/</pre>
+
+  <h2>Where the data lives</h2>
+  <div class="card tblwrap"><table>
+    <tr><th>Data</th><th>Stored in</th><th>Close &amp; reopen</th></tr>
+    <tr><td>Today's bet &amp; verdict</td><td><code>days[today]</code></td><td>Home shows the right state</td></tr>
+    <tr><td>Day history</td><td><code>days</code></td><td>Kept; missed days filled as losses</td></tr>
+    <tr><td>Streak</td><td>calculated from <code>days</code></td><td>Always matches the grid</td></tr>
+    <tr><td>Diary</td><td><code>diary</code></td><td>Kept</td></tr>
+    <tr><td>Goal &amp; savings</td><td><code>goal</code></td><td>Kept; reset when the month changes</td></tr>
+    <tr><td>Achievements, theme</td><td><code>achievements</code>, <code>theme</code></td><td>Kept / applied on open</td></tr>
+  </table>
+  <p class="small">All of it is one object under the key <code>beatYourself.v1</code>. Upgrading later to login and many devices = rewrite <code>storage.js</code> + add a login screen.</p></div>
+
+  <h2>Look and feel</h2>
+  <div class="grid2">
+    <div class="card"><h3>Hand-drawn gothic</h3><p class="small"><b>IM Fell English</b> headings · <b>Patrick Hand</b> text · SVG wobble on borders · generated paper grain · layered pencil-style shadows. No game assets. No gradients, glass or generic rounded cards.</p></div>
+    <div class="card"><h3>Day / Night</h3><p class="small">Day: sepia paper, brown ink, rust accent. Night: near-black paper, parchment ink, ember accent. Grid: muted green / red / gray. One toggle flips every color variable.</p></div>
+  </div>
+
+  <h2>Run it &amp; record it</h2>
+  <div class="card">
+    <p><b>Start:</b> double-click <code>index.html</code> (Chrome/Edge). Backup: VS Code Live Server.<br>
+    <b>Reset:</b> F12 → Console → <code>localStorage.clear()</code> → refresh.<br>
+    <b>Video:</b> hook → $3, morning $50 → Skip to tonight → night $48 → Win + pop-up → Diary &amp; Streaks → goal $100 → Skip to 30 days → grand + monthly achievements.<br>
+    <b>Submit:</b> demo video + public GitHub repo. GitHub Pages link is optional, decided in <code>6-ship</code>.</p>
+  </div>
+
+  <h2>Decisions</h2>
+  <div class="card"><ul class="decide">
+    <li><span class="pill team">team</span>Plain HTML/CSS/JS, not React</li>
+    <li><span class="pill team">team</span>Option A: <code>localStorage</code>, one device. Many devices + login → Later</li>
+    <li><span class="pill team">team</span>Catch up when the app opens</li>
+    <li><span class="pill team">team</span>Night check-in at 7 PM (PRD updated)</li>
+    <li><span class="pill team">team</span>Accepted the recommended look &amp; run approach</li>
+    <li><span class="pill agent">derived</span>Plain script tags, cents, calculated streak, <code>tests.html</code>, diary balance not reset monthly</li>
+  </ul>
+  <p class="small"><b>Useful unknown:</b> "If I choose A, can I upgrade to D later?" Yes, because every save/load goes through <code>storage.js</code>. Build check: searching <code>js/</code> for <code>localStorage</code> should find only that file.</p></div>
+</main>
+<script>
+(function(){
+  var root=document.documentElement, tb=document.getElementById('themeBtn');
+  try{var t=localStorage.getItem('specTheme'); if(t) root.setAttribute('data-theme',t);}catch(e){}
+  tb.onclick=function(){
+    var dark=root.getAttribute('data-theme')==='dark'||(!root.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);
+    var n=dark?'light':'dark'; root.setAttribute('data-theme',n);
+    try{localStorage.setItem('specTheme',n);}catch(e){}
+  };
+
+  var steps=[
+    {t:'Arrive',prd:'The Core Journey (1)',d:'You double-click index.html. app.js loads your data from storage (or starts fresh), catch-up fills in missed days and checks the month, your saved theme is applied, and Home appears.',n:['user','app','catchup','storage','ls','screens'],e:['app-catchup','catchup-storage','storage-ls','app-screens'],f:['index.html','app.js','storage.js','catchup.js','theme.js']},
+    {t:'The hook',prd:'The Core Journey (2)',d:'home.js shows "Do you think you can beat yourself?" and a CSS animation drops it in from the top.',n:['screens'],e:[],f:['home.js','components.css']},
+    {t:'Morning bet',prd:'Morning Bet · Monthly Goal',d:'If yesterday was a loss, the rules say so and the penalty notice shows. You tap $3 and type $50. home.js checks the input, rules.js works out the limit ($3 or $2.50), and storage saves today\'s record.',n:['user','screens','rules','storage','ls'],e:['user-screens','screens-rules','screens-storage','storage-ls'],f:['home.js','rules.js','storage.js']},
+    {t:'Diary (optional)',prd:'Diary',d:'You add "part-time pay, $100, income". diary.js adds it with today\'s date, storage saves it, and the balance updates. Only today\'s income counts in tonight\'s verdict.',n:['user','screens','storage','ls'],e:['user-screens','screens-storage','storage-ls'],f:['diary.js','storage.js']},
+    {t:'Night check-in',prd:'Night Check-in and Verdict · Demo Buttons',d:'At 7 PM (dates.js checks the clock), or right away with "Skip to tonight", Home shows the night balance input.',n:['screens','rules'],e:['screens-rules'],f:['home.js','dates.js']},
+    {t:'Verdict',prd:'Night Check-in and Verdict · Streaks and Achievements',d:'You type $48. rules.js: 50 + 0 − 48 = $2 spent ≤ $3 limit → Win, saved $1. Storage records it, savings go up, and achievements.js stamps the pop-up.',n:['user','screens','rules','storage','ls','pop'],e:['user-screens','screens-rules','screens-storage','storage-ls','screens-pop'],f:['home.js','rules.js','storage.js','achievements.js']},
+    {t:'Look back',prd:'Streak Viewer',d:'streaks.js reads the day records and draws green / red / gray squares. The streak number is calculated by rules.js, so it always matches Home.',n:['screens','rules','storage'],e:['screens-rules','screens-storage'],f:['streaks.js','rules.js']},
+    {t:'30-day demo',prd:'Demo Buttons',d:'"Skip to 30 days of success" writes 30 sample winning days (marked demo) ending yesterday, adds their savings to this month, and shows the grand achievement, plus the monthly one if your goal is reached.',n:['user','screens','rules','storage','ls','pop'],e:['user-screens','screens-rules','screens-storage','storage-ls','screens-pop'],f:['home.js','rules.js','storage.js','achievements.js']}
+  ];
+  var cur=0, sb=document.getElementById('stepBtns'), body=document.getElementById('stepBody');
+  steps.forEach(function(s,i){var b=document.createElement('button');b.className='btn';b.type='button';b.setAttribute('role','tab');b.textContent=(i+1)+'. '+s.t;b.onclick=function(){show(i)};sb.appendChild(b);});
+  function show(i){
+    cur=i; var s=steps[i];
+    [].forEach.call(sb.children,function(b,j){b.setAttribute('aria-selected',j===i)});
+    body.innerHTML='<div class="step-num">Step '+(i+1)+' of '+steps.length+' · prd.md &gt; '+s.prd+'</div><h3>'+s.t+'</h3><p>'+s.d+'</p><div class="files small">Files: '+s.f.map(function(f){return '<code>'+f+'</code>'}).join('')+'</div>';
+    document.querySelectorAll('#arch .node').forEach(function(g){g.classList.toggle('on',s.n.indexOf(g.dataset.n)>-1)});
+    document.querySelectorAll('#arch .edge').forEach(function(p){p.classList.toggle('on',s.e.indexOf(p.dataset.e)>-1)});
+  }
+  document.getElementById('prev').onclick=function(){show((cur+steps.length-1)%steps.length)};
+  document.getElementById('next').onclick=function(){show((cur+1)%steps.length)};
+  show(0);
+
+  var comps=[
+    ['App shell','index.html, app.js','Screens and Layout','Sidebar, toggle slot, three screen sections, pop-up layer, SVG filters. Startup: load → catch-up → theme → Home. Catch-up runs again when the window regains focus.'],
+    ['Storage','storage.js','States and Boundaries','loadData() / saveData(data) / defaultData(). One key, beatYourself.v1. Broken data → start fresh, never a blank screen.'],
+    ['Dates','dates.js','States and Boundaries','todayKey, monthKey, addDays, isNightOpen (7 PM or later).'],
+    ['Rules','rules.js','Night Check-in and Verdict · Morning Bet · Streaks','penaltyFor, limitFor, incomeOn, settleDay, currentStreak, achievementsFor. Pure math in cents: no screen, no storage.'],
+    ['Catch-up','catchup.js','Streaks and Achievements · Monthly Goal','Unsettled or skipped days before today → loss (missed). New month → savings $0.'],
+    ['Home','home.js','Morning Bet · Monthly Goal · Night · Demo Buttons','Four states: before bet → bet placed (opens 7 PM) → night open → settled. Monthly goal card below. Demo corner.'],
+    ['Diary','diary.js','Diary','Balance = starting + income − spending. Add form, newest-first list, empty prompt.'],
+    ['Streak viewer','streaks.js','Streak Viewer','Streak number + rows-of-7 grid from last month to today. Green / red / gray, today outlined.'],
+    ['Pop-ups','achievements.js','Streaks and Achievements · Monthly Goal','Small win, 30-day grand, monthly goal. Queued and stamped in, fade after ~3s.'],
+    ['Toggle','theme.js','Day/Night Toggle','Flips data-theme on the page and saves it.'],
+    ['Rules check','tests.html','Night Check-in and Verdict','Runs the PRD examples and shows PASS/FAIL. Dev aid for checking the agent\'s math.']
+  ];
+  var cb=document.getElementById('compBtns'), box=document.getElementById('compBox');
+  comps.forEach(function(c,i){var b=document.createElement('button');b.className='btn';b.type='button';b.setAttribute('role','tab');b.textContent=c[0];b.onclick=function(){comp(i)};cb.appendChild(b);});
+  function comp(i){var c=comps[i];[].forEach.call(cb.children,function(b,j){b.setAttribute('aria-selected',j===i)});
+    box.innerHTML='<h3>'+c[0]+' <span class="small">· <code>'+c[1]+'</code></span></h3><p>'+c[3]+'</p><p class="small">Implements prd.md &gt; '+c[2]+'</p>';}
+  comp(0);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat Yourself PRD</title>
+<style>
+:root{
+  --bg:#efe6d2; --paper:#f8f1e1; --ink:#2b2118; --muted:#6b5a47; --line:#8a7358;
+  --accent:#8b3a1e; --accent-soft:#f1dccb; --win:#4f7a3a; --win-soft:#dfe8cf;
+  --lose:#9e2f24; --lose-soft:#f2d6cf; --gray:#b9ab95;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16120e; --paper:#221c16; --ink:#eadfca; --muted:#b3a28a; --line:#6e5b45;
+    --accent:#e08a5c; --accent-soft:#3a2418; --win:#93c47d; --win-soft:#24301c;
+    --lose:#e8857a; --lose-soft:#3a1d1a; --gray:#5a4e40;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16120e; --paper:#221c16; --ink:#eadfca; --muted:#b3a28a; --line:#6e5b45;
+  --accent:#e08a5c; --accent-soft:#3a2418; --win:#93c47d; --win-soft:#24301c;
+  --lose:#e8857a; --lose-soft:#3a1d1a; --gray:#5a4e40;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Georgia,"Times New Roman",serif}
+main{max-width:880px;margin:0 auto;padding:36px 16px 80px}
+.tag{display:inline-block;font:600 12px/1 system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:5px 10px;border-radius:3px}
+h1{font-size:clamp(30px,6vw,46px);line-height:1.1;margin:14px 0 6px;letter-spacing:-.01em}
+h2{font-size:23px;margin:44px 0 10px;border-bottom:2px dashed var(--line);padding-bottom:6px}
+h3{margin:0 0 6px;font-size:18px}
+p.lede{color:var(--muted);font-size:18px;margin:0}
+.card{background:var(--paper);border:2px solid var(--line);border-radius:6px 14px 8px 12px/12px 6px 14px 8px;padding:16px 18px;margin:12px 0;box-shadow:3px 3px 0 var(--line)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}}
+.then{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--accent)}
+.small{font-size:14px;color:var(--muted)}
+svg{max-width:100%;height:auto;display:block}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.tabs button,.calc button{font:600 14px system-ui,sans-serif;background:var(--paper);color:var(--ink);border:2px solid var(--line);padding:7px 14px;border-radius:5px 10px 6px 9px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--paper);border-color:var(--accent)}
+.panel{display:none}.panel.on{display:block}
+ul.check{list-style:none;padding:0;margin:6px 0}
+ul.check li{padding-left:26px;position:relative;margin:4px 0}
+ul.check li:before{content:"☐";position:absolute;left:2px;color:var(--accent)}
+.lbl{font:700 12px system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:10px}
+.calc label{display:block;font:14px system-ui,sans-serif;color:var(--muted)}
+.calc input{width:100%;font:16px system-ui,sans-serif;padding:7px;border:2px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink)}
+.calc .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:8px 0}
+.verdict{font-size:22px;font-weight:700;padding:10px 14px;border-radius:6px;margin-top:10px}
+.verdict.win{background:var(--win-soft);color:var(--win)}.verdict.lose{background:var(--lose-soft);color:var(--lose)}
+.pill{display:inline-block;padding:2px 9px;border-radius:3px;font:600 13px system-ui,sans-serif;margin:2px}
+.in{background:var(--win-soft);color:var(--win)}.out{background:var(--lose-soft);color:var(--lose)}
+.toggle{position:fixed;top:12px;right:12px;font:600 13px system-ui,sans-serif;background:var(--paper);color:var(--ink);border:2px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer}
+code{font-family:Consolas,monospace;font-size:14px;background:var(--accent-soft);padding:1px 5px;border-radius:3px}
+</style>
+</head>
+<body>
+<button class="toggle" id="tt" type="button">☾ / ☀</button>
+<main>
+<span class="tag">3-prd · approved</span>
+<h1>Beat Yourself — Product Requirements</h1>
+<p class="lede">Bet on your own spending each morning, settle up each night, and beat yesterday's you. Hand-drawn, gothic, sepia.</p>
+<p class="small">Canonical document: <code>devpost/prd.md</code>. This page is a companion for reviewing it together.</p>
+
+<h2>What the scope said → what we know now</h2>
+<div class="grid2">
+  <div class="card"><div class="lbl">Morning</div><p><span class="then">"pick a bet type, tap an amount"</span><br>One bet: <b>"spend no more than"</b>, with buttons $2 · $3 · $5 · $10 · Custom.</p></div>
+  <div class="card"><div class="lbl">Verdict</div><p><span class="then">"compare night with morning balance"</span><br><b>Actual spent = Morning + Income today − Night</b>, so getting paid can't hide overspending.</p></div>
+  <div class="card"><div class="lbl">Losing</div><p><span class="then">"tomorrow's stakes get harder"</span><br>A flat <b>$0.50 penalty</b> on tomorrow's limit, announced with a morning notice. A missed check-in also counts as a loss.</p></div>
+  <div class="card"><div class="lbl">New in this build</div><p>A <b>Diary</b> (spending + income), a <b>Streaks grid</b>, a <b>monthly goal</b>, a <b>30-day grand achievement</b>, and a <b>day/night toggle</b>.</p></div>
+</div>
+
+<h2>The core journey</h2>
+<div class="card">
+<svg viewBox="0 0 820 250" role="img" aria-label="Journey: open app, hook, morning bet, diary during the day, night check-in, verdict branching to win or lose, then streaks">
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--line)"/></marker></defs>
+  <g font-family="system-ui,sans-serif" font-size="13" fill="var(--ink)" text-anchor="middle">
+    <g stroke="var(--line)" stroke-width="2" fill="var(--paper)">
+      <rect x="10" y="30" width="110" height="56" rx="8"/><rect x="145" y="30" width="110" height="56" rx="8"/>
+      <rect x="280" y="30" width="120" height="56" rx="8"/><rect x="425" y="30" width="120" height="56" rx="8" stroke-dasharray="5 4"/>
+      <rect x="570" y="30" width="110" height="56" rx="8"/>
+      <rect x="700" y="20" width="110" height="34" rx="8" fill="var(--win-soft)"/><rect x="700" y="66" width="110" height="34" rx="8" fill="var(--lose-soft)"/>
+      <rect x="560" y="165" width="250" height="56" rx="8"/>
+      <rect x="10" y="165" width="250" height="56" rx="8" stroke-dasharray="5 4"/>
+    </g>
+    <text x="65" y="55">1. Open app</text><text x="65" y="73" fill="var(--muted)" font-size="11">sidebar · Home</text>
+    <text x="200" y="55">2. The hook</text><text x="200" y="73" fill="var(--muted)" font-size="11">"Beat yourself?"</text>
+    <text x="340" y="55">3. Morning bet</text><text x="340" y="73" fill="var(--muted)" font-size="11">tap $ · balance</text>
+    <text x="485" y="55">4. Diary</text><text x="485" y="73" fill="var(--muted)" font-size="11">optional · in / out</text>
+    <text x="625" y="55">5. Night</text><text x="625" y="73" fill="var(--muted)" font-size="11">night balance</text>
+    <text x="755" y="42" fill="var(--win)" font-weight="700">Win · +1 🏅</text>
+    <text x="755" y="88" fill="var(--lose)" font-weight="700">Lose · 0 · −$0.50</text>
+    <text x="685" y="190">7. Streaks grid</text><text x="685" y="208" fill="var(--muted)" font-size="11">green · red · gray · current streak</text>
+    <text x="135" y="190">Demo buttons</text><text x="135" y="208" fill="var(--muted)" font-size="11">Skip to tonight · Skip to 30 days</text>
+    <g stroke="var(--line)" stroke-width="2" fill="none" marker-end="url(#a)">
+      <path d="M120 58H143"/><path d="M255 58H278"/><path d="M400 58H423"/><path d="M545 58H568"/>
+      <path d="M680 50L698 38"/><path d="M680 66L698 80"/>
+      <path d="M755 102V163"/>
+      <path d="M260 180Q420 120 568 86" stroke-dasharray="4 4"/>
+    </g>
+    <text x="625" y="118" fill="var(--muted)" font-size="11">6. Verdict</text>
+  </g>
+</svg>
+<p class="small">Dashed = optional or demo-only. Losing also carries tomorrow's penalty back to step 3.</p>
+</div>
+
+<h2>Explore each screen</h2>
+<div class="tabs" role="tablist">
+  <button role="tab" aria-selected="true" data-p="home">Home · morning</button>
+  <button role="tab" aria-selected="false" data-p="night">Home · night</button>
+  <button role="tab" aria-selected="false" data-p="diary">Diary</button>
+  <button role="tab" aria-selected="false" data-p="streaks">Streaks</button>
+  <button role="tab" aria-selected="false" data-p="all">Everywhere</button>
+</div>
+<div class="card">
+<section class="panel on" id="home">
+  <h3>Home: morning bet</h3>
+  <p>Top half: "Do you think you can beat yourself?" drops in. Bottom half: <i>"Today I'll spend no more than…"</i> $2 · $3 · $5 · $10 · Custom, then the morning balance. The monthly goal sits below.</p>
+  <div class="lbl">States</div>
+  <p>First use: streak 0 and the hook. Day after a loss: a penalty notice appears before the bet. Invalid or empty input: a friendly message, and the bet isn't confirmed.</p>
+  <div class="lbl">How we'll know it works</div>
+  <ul class="check"><li>All five buttons visible, and the tapped one is marked</li><li>Custom lets you type an amount</li><li>After a loss: notice shown, limit = tapped − $0.50</li><li>Can't confirm without an amount and a valid balance</li></ul>
+</section>
+<section class="panel" id="night">
+  <h3>Home: night check-in and verdict</h3>
+  <p>Unlocks at 7 PM, or right away with <b>Skip to tonight</b>. Enter the night balance and get the verdict.</p>
+  <div class="lbl">States</div>
+  <p>Win: streak +1, achievement pop-up, unspent amount added to monthly savings. Lose: streak → 0, $0.50 penalty tomorrow. No check-in by midnight → loss.</p>
+  <div class="lbl">How we'll know it works</div>
+  <ul class="check"><li>$50 morning, +$100 income, $130 night, $3 limit → Lose</li><li>$50 morning, no income, $48 night, $3 limit → Win</li><li>Verdict appears right after entering the night balance</li></ul>
+</section>
+<section class="panel" id="diary">
+  <h3>Diary</h3>
+  <p>Top: this month's balance. Bottom: add entries as <span class="pill out">− spending</span> or <span class="pill in">+ income</span>, and see the list. Today's income feeds the verdict. Spending entries are a record only.</p>
+  <div class="lbl">States</div>
+  <p>Empty: a short prompt to add a first entry. Invalid amount: a friendly message.</p>
+  <div class="lbl">How we'll know it works</div>
+  <ul class="check"><li>$4 spending → balance drops by exactly $4</li><li>$100 income → balance rises $100 and counts in tonight's income</li><li>New entries appear in the list</li></ul>
+</section>
+<section class="panel" id="streaks">
+  <h3>Streaks</h3>
+  <p>Activity grid: <span class="pill in">green win</span><span class="pill out">red loss</span><span class="pill" style="background:var(--gray)">gray no data</span>, plus the current streak.</p>
+  <div class="lbl">How we'll know it works</div>
+  <ul class="check"><li>Today's square turns green or red after the verdict</li><li>Streak number matches Home</li><li>"Skip to 30 days of success" → 30 green squares + grand achievement, and monthly savings filled (monthly achievement if the goal is reached)</li></ul>
+</section>
+<section class="panel" id="all">
+  <h3>Everywhere</h3>
+  <p>Left sidebar (Home · Diary · Streaks) and the top-right day/night toggle. Everything is remembered on this device after closing and reopening. One user, no login.</p>
+  <ul class="check"><li>Toggle switches the whole look immediately</li><li>Reload keeps streak, history, diary, goal, and theme</li></ul>
+</section>
+</div>
+
+<h2>Try the verdict</h2>
+<div class="card calc">
+  <p class="small">Check the formula with your own numbers: <b>Actual spent = Morning + Income today − Night</b>.</p>
+  <div class="row">
+    <label>Bet ($)<input id="bet" type="number" value="3" step="0.5"></label>
+    <label>Morning ($)<input id="mor" type="number" value="50"></label>
+    <label>Income today ($)<input id="inc" type="number" value="100"></label>
+    <label>Night ($)<input id="nig" type="number" value="130"></label>
+  </div>
+  <label style="display:flex;gap:8px;align-items:center"><input id="pen" type="checkbox" style="width:auto"> Lost yesterday (−$0.50 penalty)</label>
+  <div id="out" class="verdict"></div>
+</div>
+
+<h2>Building now vs. later</h2>
+<div class="grid2">
+  <div class="card"><h3>Building now</h3><ul><li>Sidebar + day/night toggle</li><li>Morning bet, monthly goal</li><li>Night check-in, verdict formula, $0.50 penalty</li><li>Streak, achievements (win · 30-day · monthly)</li><li>Diary (spending + income)</li><li>Streaks grid</li><li>Two demo skip buttons</li><li>Hand-drawn gothic look</li></ul></div>
+  <div class="card"><h3>Later</h3><ul><li><b>Login</b>: needs accounts and a server</li><li><b>Font settings</b>: cut to make room for the diary</li><li><b>Many devices</b>: needs online storage + login</li><li><b>Real night notifications</b></li><li>Leaderboards, friends, pushups penalty, more achievements</li></ul><p class="small">Never: charging real money, gambling framing, bank connections, copied game assets.</p></div>
+</div>
+
+<h2>Look and feel</h2>
+<div class="card"><p>Hand-drawn gothic, inspired by the <i>feel</i> of Don't Starve. Sepia and dark tones in several layers, paper texture, sketchy borders. It should look like real hand drawing, not an AI template. <b>No copied game assets.</b> Say "stakes," never "gambling."</p></div>
+
+<h2>Still open</h2>
+<div class="card">
+  <p><b>Resolved:</b> "Skip to 30 days of success" also fills this month's savings, so the monthly achievement can show in the video.</p>
+  <p class="small">Can wait: the final name (Beat Yourself is a working title), and whether the night check-in pre-fills from the Diary balance.</p>
+</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id===b.dataset.p));
+});
+function calc(){
+  const n=k=>parseFloat($(k).value)||0;
+  const limit=Math.max(0,n('bet')-($('pen').checked?0.5:0));
+  const spent=Math.max(0,n('mor')+n('inc')-n('nig'));
+  const win=spent<=limit, o=$('out');
+  o.className='verdict '+(win?'win':'lose');
+  o.textContent=(win?'WIN':'LOSE')+' · spent $'+spent.toFixed(2)+' vs limit $'+limit.toFixed(2)+(win?' · saved $'+(limit-spent).toFixed(2):' · streak → 0');
+}
+['bet','mor','inc','nig','pen'].forEach(k=>$(k).addEventListener('input',calc));calc();
+$('tt').onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=dark?'light':'dark';};
+</script>
+</body>
+</html>

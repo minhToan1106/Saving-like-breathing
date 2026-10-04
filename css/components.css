@@ -1,0 +1,233 @@
+/* Buttons, cards, inputs, the hook animation and the verdict. */
+
+/* ---------- Hook ---------- */
+.hook {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(34px, 6vw, 64px);
+  line-height: 1.08;
+  color: var(--ink);
+  text-shadow: 2px 2px 0 var(--shade-2);
+  animation: hook-drop 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+@keyframes hook-drop {
+  from { transform: translateY(-140%) rotate(-2deg); opacity: 0; }
+  to   { transform: translateY(0) rotate(0); opacity: 1; }
+}
+
+/* ---------- Buttons ---------- */
+.btn,
+.nav-link {
+  position: relative;
+  isolation: isolate;
+  font: inherit;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  padding: 8px 18px;
+  cursor: pointer;
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: var(--rough-b);
+  filter: url(#wobble);
+  box-shadow: 2px 3px 0 -1px var(--shade-1);
+  transition: transform 0.12s;
+}
+
+.btn:hover::before { transform: rotate(-1deg) scale(1.03); }
+.btn:active::before { transform: translate(1px, 2px); box-shadow: none; }
+
+.btn:focus-visible,
+.nav-link:focus-visible,
+input:focus-visible {
+  outline: 2px dashed var(--accent);
+  outline-offset: 4px;
+}
+
+.btn.primary,
+.btn.is-selected {
+  color: var(--on-ink);
+}
+
+.btn.primary::before,
+.btn.is-selected::before {
+  background: var(--ink);
+}
+
+.btn.is-selected::before {
+  transform: rotate(-2deg) scale(1.06);
+  background: var(--accent);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.btn:disabled:hover::before { transform: none; }
+
+.tag {
+  font-size: 0.75em;
+  padding: 0 6px;
+  margin-left: 4px;
+  border: 1px dashed currentColor;
+  border-radius: 6px;
+}
+
+/* ---------- Sidebar links ---------- */
+.nav-link {
+  width: 100%;
+  text-align: left;
+  font-size: 21px;
+  padding: 4px 8px;
+}
+
+.nav-link.is-active {
+  color: var(--accent);
+  text-decoration: underline wavy var(--accent) 1px;
+  text-underline-offset: 6px;
+}
+
+.nav-link:disabled {
+  cursor: default;
+  color: var(--ink-soft);
+  opacity: 0.6;
+}
+
+.soon {
+  font-size: 0.65em;
+  font-style: italic;
+}
+
+/* ---------- Cards ---------- */
+.card {
+  width: min(100%, 560px);
+  box-sizing: border-box;
+  padding: 24px 28px;
+}
+
+.card p {
+  margin: 0 0 10px;
+}
+
+.eyebrow {
+  font-family: var(--font-head);
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.bet-sentence,
+.big-line {
+  font-family: var(--font-head);
+  font-size: 28px;
+  line-height: 1.15;
+}
+
+.muted {
+  color: var(--ink-soft);
+}
+
+.stakes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0 18px;
+}
+
+.stake {
+  min-width: 64px;
+  font-size: 22px;
+}
+
+/* ---------- Inputs ---------- */
+.field {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.field[hidden] {
+  display: none;
+}
+
+.field label {
+  color: var(--ink-soft);
+}
+
+.field input {
+  font: inherit;
+  font-size: 22px;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--ink);
+  padding: 4px 2px;
+  max-width: 240px;
+  filter: url(#wobble);
+}
+
+.field input::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.6;
+}
+
+.field-error {
+  min-height: 1.2em;
+  margin: 0;
+  color: var(--loss);
+  font-size: 0.9em;
+}
+
+.hint {
+  font-size: 0.9em;
+  color: var(--ink-soft);
+}
+
+/* ---------- Verdict ---------- */
+.verdict {
+  text-align: center;
+}
+
+.verdict-word {
+  font-family: var(--font-head);
+  font-size: 72px;
+  line-height: 1;
+  letter-spacing: 2px;
+  margin: 0 0 8px !important;
+  animation: stamp 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.verdict-win .verdict-word { color: var(--win); }
+.verdict-loss .verdict-word { color: var(--loss); }
+
+.verdict-line {
+  font-family: var(--font-head);
+  font-style: italic;
+  font-size: 22px;
+}
+
+.math {
+  font-size: 0.9em;
+}
+
+@keyframes stamp {
+  from { transform: scale(2.2) rotate(-12deg); opacity: 0; }
+  to   { transform: scale(1) rotate(-3deg); opacity: 1; }
+}
+
+/* ---------- Notices ---------- */
+.notice {
+  margin-right: auto;
+  padding: 6px 14px;
+  color: var(--on-ink);
+  background: var(--loss);
+  border-radius: var(--rough-b);
+}
