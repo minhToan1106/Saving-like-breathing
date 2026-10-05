@@ -56,10 +56,12 @@ Traces `prd.md > The Core Journey`.
 - **Backup start:** if the browser misbehaves with `file://`, open the folder in VS Code, install the **Live Server** extension, right-click `index.html` → *Open with Live Server*.
 - **Reset to a clean first-use state** (before recording): open DevTools (F12) → Console → type `localStorage.clear()` → press Enter, then refresh.
 - **Demo recording (about 1 minute), following `scope.md > What "Working" Looks Like`:**
-  1. Fresh state → the hook drops in → tap $3 → enter morning balance $50 → confirm.
-  2. Tap **Skip to tonight** → enter night balance $48 → **Win**, achievement pop-up, streak 1. (Optionally replay a loss: night $40 → Lose, then show the penalty notice.)
-  3. Show the Diary and the Streaks grid.
+  1. Fresh state → the hook drops in → open **Diary** and enter $300 as this month's money.
+  2. On Home, tap **Suggested $10.00** → **Lock in the stakes** → **Skip to tonight** → enter $298 → **Win**, achievement pop-up, streak 1. (Optionally replay a loss to show the penalty notice.)
+  3. Show the Diary and the full-year Streaks grid.
   4. Set the monthly goal to $100 → tap **Skip to 30 days of success** → 30-day grand achievement and monthly achievement.
+  5. Flip the day/night toggle.
+- **README:** `README.md` repeats how to run, reset, and record the demo.
 - **Submission:** a short demo video plus a public GitHub repository. Both are required.
 - **Optional deployment (decide in `6-ship`):** GitHub Pages can serve these same files at a free public link, with no code changes. Each visitor's device keeps its own data.
 

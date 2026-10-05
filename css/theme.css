@@ -18,6 +18,23 @@
   --grain-opacity: 0.55;
 }
 
+/* Night: near-black paper, parchment ink, ember accent */
+[data-theme="night"] {
+  --paper: #16120e;
+  --paper-deep: #0e0b08;
+  --card: #231c15;
+  --ink: #e6d8bd;
+  --ink-soft: #b5a283;
+  --accent: #d9824f;
+  --on-ink: #16120e;
+  --shade-1: rgba(0, 0, 0, 0.5);
+  --shade-2: rgba(0, 0, 0, 0.3);
+  --win: #7f9e62;
+  --loss: #c4594a;
+  --none: #5a5044;
+  --grain-opacity: 0.35;
+}
+
 :root {
   --font-head: "IM Fell English", Georgia, serif;
   --font-body: "Patrick Hand", "Comic Sans MS", cursive;

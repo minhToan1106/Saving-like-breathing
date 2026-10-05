@@ -59,7 +59,7 @@ Build mode: learn
   Learner check: Reset, enter 300 as this month's money in the Diary, set your goal to $100, tap "Skip to 30 days of success", and watch both achievements pop up. Open Streaks: you should see a row of green squares and a streak of 30. Win today too, and it should become 31 with today's square turning green.
   Commit: `Add streak grid and 30-day demo`
 
-- [ ] **6. Day and night themes, and the app is ready to show**
+- [x] **6. Day and night themes, and the app is ready to show**
   Becomes usable: The top-right toggle flips the whole app between sepia day and dark night, and it remembers your choice. A README explains how to run, reset, and record the demo.
   Why now: The base sepia look ships in slice 1 so every screen is styled from the start. Adding the second theme last means it is tested against every finished screen at once, and the final polish pass fixes anything that looks off.
   PRD ref: `prd.md > Day/Night Toggle`, `prd.md > Look and Feel`, `prd.md > States and Boundaries` (theme persists)

@@ -50,6 +50,7 @@ window.BY = window.BY || {};
 
   function start() {
     BY.state = { data: BY.storage.loadData(), screen: 'home' };
+    BY.theme.init(BY.state.data);
     document.querySelectorAll('.nav-link').forEach(function (b) {
       b.addEventListener('click', function () {
         if (SCREENS[b.dataset.screen]) showScreen(b.dataset.screen);

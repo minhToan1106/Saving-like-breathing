@@ -360,6 +360,22 @@ input:focus-visible {
   border-style: dashed;
 }
 
+/* ---------- Day/night toggle (top right) ---------- */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
 /* ---------- Demo corner ---------- */
 .demo-corner {
   margin: 26px auto 0;
