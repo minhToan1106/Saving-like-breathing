@@ -63,10 +63,12 @@ Develops `scope.md > The Core Loop` (step 1).
 
 ### Monthly Goal
 - Below the morning bet, the user can set a monthly saving goal (e.g. $600).
-- **Saved this month** = the sum of each won day's unspent amount (limit − actual spent).
+- **Suggested bet** = this month's starting money ÷ 30, the same every day of the month (e.g. $300 → $10.00). Home shows it as a "Suggested $10.00" button and a line explaining the math. Users can still bet any amount.
+- **Saved this month** = the sum of each won day's unspent amount, counted only up to the suggested bet: **(the smaller of the limit and the suggested bet) − actual spent**, never below $0. This stops a huge bet against a tiny goal from reaching the goal in one day.
+- [ ] Example: starting money $300 (suggested $10), goal $95, bet $100, spent $5 → **Win**, but only $5 is saved, and no monthly achievement.
 - Reaching the goal unlocks a **big monthly achievement**.
 - Savings reset to $0 on the 1st of each month.
-- [ ] After a win, saved-this-month increases by exactly (limit − actual spent).
+- [ ] After a win with a bet at or below the suggested bet, saved-this-month increases by exactly (limit − actual spent).
 - [ ] When saved-this-month reaches the goal, the monthly achievement pops up.
 
 ### Night Check-in and Verdict
@@ -150,7 +152,7 @@ Develops `scope.md > What "Working" Looks Like`.
 - **Loss penalty = $0.50 off the next day's limit**, shown in a morning notice. This replaces scope's "tomorrow's stakes get harder" with a concrete rule.
 - **A missed check-in counts as a loss.**
 - **A small achievement on every win**, a grand achievement at 30 consecutive wins, and a big achievement for reaching the monthly goal.
-- **Monthly savings** = the sum of each day's unspent limit.
+- **Monthly savings** = the sum of each day's unspent limit, capped at the suggested bet (starting money ÷ 30), decided during `5-build` after the team found that a huge bet against a low goal could reach the goal in one day. The suggestion guides without forcing: users who spend more can still bet high.
 - **"Skip to 30 days of success"** demo button, which also fills this month's savings, so the 30-day and monthly achievements can both be shown in the video.
 - **Hand-drawn gothic look** inspired by Don't Starve, using no copied assets.
 - **Day/night toggle in, font settings and login out.**

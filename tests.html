@@ -166,6 +166,33 @@
       check("Balance = this month's start + income − spending", R.monthBalance(md, '2026-10'), 29600);
       check("Last month's starting money doesn't answer this month", R.monthBalance({ diary: { startingBalances: { '2026-09': 5000 }, entries: [] } }, '2026-10'), null);
 
+      // ---- Monthly goal (prd.md > Monthly Goal) ----
+      var w = R.settleDay(5000, 0, 4800, 300);
+      var g = { amount: 100, month: '2026-10', saved: 0, monthlyAchieved: false };
+      g.saved += w.saved;
+      check('A win at a $3 limit spending $2 adds exactly $1 to savings', g.saved, 100);
+      var goalData = { days: { '2026-10-04': day('win') }, goal: g };
+      check('Reaching the goal earns the monthly achievement', R.achievementsFor(goalData, '2026-10-04'), ['win', 'monthly']);
+      g.monthlyAchieved = true;
+      check('… only once a month', R.achievementsFor(goalData, '2026-10-04'), ['win']);
+      check('No goal set → no monthly achievement',
+        R.goalJustReached({ amount: 0, saved: 500, monthlyAchieved: false }), false);
+      check('Below the goal → not yet', R.goalJustReached({ amount: 600, saved: 599, monthlyAchieved: false }), false);
+      var oldGoal = { startDate: '2026-10-01', days: {}, goal: { amount: 60000, month: '2026-09', saved: 4200, monthlyAchieved: true } };
+      BY.catchup.run(oldGoal, new Date(2026, 9, 1, 9, 0));
+      check('A goal from last month resets savings to $0', [oldGoal.goal.saved, oldGoal.goal.monthlyAchieved, oldGoal.goal.month], [0, false, '2026-10']);
+      check('… and keeps the goal amount', oldGoal.goal.amount, 60000);
+
+      // ---- Suggested bet caps savings (team decision in slice 4) ----
+      check('Suggested bet = $300 starting money ÷ 30 = $10', R.suggestedBet(30000), 1000);
+      check('No starting money → no suggestion', R.suggestedBet(undefined), null);
+      var cheat = R.settleDay(10000, 0, 9500, 10000, 1000);
+      check('The cheat: bet $100, spend $5, suggestion $10 → still a Win', cheat.result, 'win');
+      check('… but only $5 saved, not $95', cheat.saved, 500);
+      check('Bet below the suggestion → saves limit − spent as before', R.settleDay(5000, 0, 4800, 300, 1000).saved, 100);
+      check('Win spending more than the suggestion → $0 saved, never negative', R.settleDay(10000, 0, 8500, 2000, 1000).saved, 0);
+      check('Old days without a suggestion → no cap', R.settleDay(5000, 0, 4800, 300).saved, 100);
+
       // ---- Show results ----
       var list = document.getElementById('results');
       var failed = 0;

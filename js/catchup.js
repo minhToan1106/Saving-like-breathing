@@ -35,6 +35,15 @@ window.BY = window.BY || {};
       }
     }
 
+    // New month: savings start again from $0. The goal amount itself is kept.
+    var month = BY.dates.monthKey(now);
+    if (data.goal && data.goal.month !== month) {
+      data.goal.month = month;
+      data.goal.saved = 0;
+      data.goal.monthlyAchieved = false;
+      changed = true;
+    }
+
     return changed;
   }
 

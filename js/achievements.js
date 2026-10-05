@@ -9,6 +9,9 @@ window.BY = window.BY || {};
   var TEXT = {
     win: function (info) {
       return { title: 'Yesterday\'s you: beaten.', sub: 'Streak: ' + info.streak + (info.streak === 1 ? ' day' : ' days') };
+    },
+    monthly: function (info) {
+      return { title: 'Goal Reached', sub: BY.rules.formatMoney(info.data.goal.saved) + ' saved this month', big: true };
     }
   };
 
@@ -28,7 +31,7 @@ window.BY = window.BY || {};
     var layer = document.getElementById('popups');
     var card = document.createElement('button');
     card.type = 'button';
-    card.className = 'popup sketch';
+    card.className = 'popup sketch' + (item.big ? ' popup-big' : '');
     card.innerHTML = '<span class="popup-kicker">Achievement</span>' +
       '<span class="popup-title"></span><span class="popup-sub"></span>';
     card.querySelector('.popup-title').textContent = item.title;

@@ -7,7 +7,7 @@ window.BY = window.BY || {};
   var BALANCE_ERROR = 'Enter your balance as a number, like 48.50';
 
   // What the user has picked but not confirmed yet
-  var ui = { stake: null, custom: false };
+  var ui = { stake: null, custom: false, suggested: false };
 
   function money(cents) {
     return BY.rules.formatMoney(cents);
@@ -30,8 +30,10 @@ window.BY = window.BY || {};
     play.innerHTML =
       '<p class="streak-badge sketch">Streak: <strong id="home-streak">' + streak + '</strong>' +
         (streak === 1 ? ' day' : ' days') + '</p>' +
-      '<div id="home-card" class="home-card"></div>';
+      '<div id="home-card" class="home-card"></div>' +
+      '<div id="home-goal" class="home-card"></div>';
     var root = play.querySelector('#home-card');
+    renderGoal(play.querySelector('#home-goal'), data, day);
 
     if (!day) {
       renderBet(root, data, today);
@@ -85,7 +87,9 @@ window.BY = window.BY || {};
         '<div class="stakes" role="group" aria-label="Spending limit">' +
           stakeButtons +
           '<button type="button" class="btn stake" data-stake="custom">Custom</button>' +
+          '<button type="button" class="btn stake stake-suggested" data-stake="suggested" id="suggest-btn" hidden></button>' +
         '</div>' +
+        '<p class="hint" id="suggest-line" hidden></p>' +
         '<div class="field" id="custom-field" hidden>' +
           '<label for="custom-stake">Your own limit</label>' +
           '<input id="custom-stake" inputmode="decimal" autocomplete="off" placeholder="e.g. 4.50">' +
@@ -102,13 +106,40 @@ window.BY = window.BY || {};
     var morningInput = root.querySelector('#morning-balance'); // only when asking for this month's money
     var confirmBtn = root.querySelector('#confirm-bet');
 
+    // This month's starting money: already saved, or what's being typed on day one / a new month
+    function startingMoney() {
+      if (morningInput) return BY.rules.parseMoney(morningInput.value);
+      return data.diary.startingBalances[month];
+    }
+
     function chosenStake() {
+      if (ui.suggested) {
+        var s = BY.rules.suggestedBet(startingMoney());
+        return s && s > 0 ? s : null;
+      }
       if (!ui.custom) return ui.stake;
       var c = BY.rules.parseMoney(customInput.value);
       return c && c > 0 ? c : null;
     }
 
+    function showSuggestion() {
+      var start = startingMoney();
+      var s = BY.rules.suggestedBet(start);
+      var btn = root.querySelector('#suggest-btn');
+      var line = root.querySelector('#suggest-line');
+      btn.hidden = line.hidden = !(s > 0);
+      if (s > 0) {
+        btn.textContent = 'Suggested ' + money(s);
+        line.textContent = 'Suggested bet: ' + money(s) + ' (your ' + money(start) +
+          ' this month ÷ 30). Bet higher if you like, but only up to ' + money(s) + ' a day counts toward savings.';
+      } else if (ui.suggested) {
+        ui.suggested = false;
+        btn.classList.remove('is-selected');
+      }
+    }
+
     function validate() {
+      showSuggestion();
       var stake = chosenStake();
       var morning = morningInput ? BY.rules.parseMoney(morningInput.value) : diaryBalance;
       root.querySelector('#custom-error').textContent =
@@ -138,7 +169,8 @@ window.BY = window.BY || {};
         btn.classList.add('is-selected');
         btn.setAttribute('aria-pressed', 'true');
         ui.custom = btn.dataset.stake === 'custom';
-        ui.stake = ui.custom ? null : Number(btn.dataset.stake);
+        ui.suggested = btn.dataset.stake === 'suggested';
+        ui.stake = ui.custom || ui.suggested ? null : Number(btn.dataset.stake);
         customField.hidden = !ui.custom;
         if (ui.custom) customInput.focus();
         validate();
@@ -147,6 +179,7 @@ window.BY = window.BY || {};
 
     customInput.addEventListener('input', validate);
     if (morningInput) morningInput.addEventListener('input', validate);
+    showSuggestion();
     var fixLink = root.querySelector('#fix-in-diary');
     if (fixLink) fixLink.addEventListener('click', function () { BY.app.showScreen('diary'); });
 
@@ -160,6 +193,7 @@ window.BY = window.BY || {};
         limit: BY.rules.limitFor(bet.stake, penalty),
         morningBalance: bet.morning,   // the Diary balance at the moment of the bet
         betAt: Date.now(),
+        suggested: BY.rules.suggestedBet(data.diary.startingBalances[month]), // caps savings
         nightBalance: null,
         income: 0,
         actualSpent: null,
@@ -170,7 +204,7 @@ window.BY = window.BY || {};
         missed: false,
         demo: false
       };
-      ui = { stake: null, custom: false };
+      ui = { stake: null, custom: false, suggested: false };
       save(data);
       render(data);
     });
@@ -232,13 +266,14 @@ window.BY = window.BY || {};
       if (night === null) return;
       var today = BY.dates.todayKey();
       var income = BY.rules.incomeOn(data, today, day.betAt);
-      var outcome = BY.rules.settleDay(day.morningBalance, income, night, day.limit);
+      var outcome = BY.rules.settleDay(day.morningBalance, income, night, day.limit, day.suggested);
       day.nightBalance = night;
       day.income = income;
       day.actualSpent = outcome.actualSpent;
       day.result = outcome.result;
       day.saved = outcome.saved;
       day.settledAt = Date.now();
+      data.goal.saved += outcome.saved;
       // Keep the Diary matching real money: anything missing was spent without being logged
       var unlogged = BY.rules.unloggedSpending(BY.rules.monthBalance(data, BY.dates.monthKey()), night);
       if (unlogged) {
@@ -252,12 +287,72 @@ window.BY = window.BY || {};
         });
         day.unlogged = unlogged.amount;
       }
+      var kinds = BY.rules.achievementsFor(data, today);
+      if (kinds.indexOf('monthly') !== -1) data.goal.monthlyAchieved = true;
       render(data);
-      BY.rules.achievementsFor(data, today).forEach(function (kind) {
+      kinds.forEach(function (kind) {
         BY.achievements.show(kind, data);
       });
       save(data);
     });
+  }
+
+  // ---------- Monthly goal (always below the bet) ----------
+  function renderGoal(root, data, today) {
+    var goal = data.goal;
+    var pct = goal.amount > 0 ? Math.min(100, Math.round(goal.saved / goal.amount * 100)) : 0;
+    root.innerHTML =
+      '<div class="card sketch goal-card">' +
+        '<p class="eyebrow">Monthly saving goal</p>' +
+        '<p class="goal-line">Saved this month: <strong id="goal-saved">' + money(goal.saved) + '</strong>' +
+          (goal.amount > 0 ? ' of <strong>' + money(goal.amount) + '</strong>' : '') + '</p>' +
+        (today && today.result === 'win' ? savedLine(today) : '') +
+        (goal.amount > 0
+          ? '<div class="progress sketch" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '">' +
+              '<div class="progress-fill" id="goal-fill" style="width:' + pct + '%"></div>' +
+            '</div>'
+          : '<p class="hint">Every win saves what you didn\'t spend from your limit. Set a goal to aim for.</p>') +
+        (goal.monthlyAchieved ? '<p class="goal-done" id="goal-done">Goal reached this month.</p>' : '') +
+        '<div class="inline-form">' +
+          '<div class="field">' +
+            '<label for="goal-amount">Goal for this month</label>' +
+            '<input id="goal-amount" inputmode="decimal" autocomplete="off" placeholder="e.g. 600.00"' +
+              (goal.amount > 0 ? ' value="' + (goal.amount / 100).toFixed(2) + '"' : '') + '>' +
+            '<p class="field-error" id="goal-error"></p>' +
+          '</div>' +
+          '<button type="button" class="btn" id="set-goal" disabled>Set goal</button>' +
+        '</div>' +
+      '</div>';
+
+    var input = root.querySelector('#goal-amount');
+    var btn = root.querySelector('#set-goal');
+    function valid() {
+      var v = BY.rules.parseMoney(input.value);
+      return v && v > 0 ? v : null;
+    }
+    input.addEventListener('input', function () {
+      var v = valid();
+      root.querySelector('#goal-error').textContent =
+        input.value.trim() && v === null ? 'Enter a goal above $0, like 600.00' : '';
+      btn.disabled = v === null || v === goal.amount;
+    });
+    btn.addEventListener('click', function () {
+      var v = valid();
+      if (v === null) return;
+      goal.amount = v;
+      var reached = BY.rules.goalJustReached(goal);
+      if (reached) goal.monthlyAchieved = true;
+      save(data);
+      render(data);
+      if (reached) BY.achievements.show('monthly', data);
+    });
+  }
+
+  // In the goal card after a win: "Today you saved $5.00 toward this month's goal (only up to your suggested $10.00 counts)."
+  function savedLine(day) {
+    var capped = typeof day.suggested === 'number' && day.limit > day.suggested;
+    return '<p class="muted" id="saved-line">Today you saved <strong>' + money(day.saved) + '</strong> toward this month\'s goal' +
+      (capped ? ' (only up to your suggested ' + money(day.suggested) + ' counts)' : '') + '.</p>';
   }
 
   // ---------- 4. Settled ----------

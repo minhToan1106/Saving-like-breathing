@@ -154,7 +154,8 @@ input:focus-visible {
   margin-bottom: 14px;
 }
 
-.field[hidden] {
+.field[hidden],
+.btn[hidden] {
   display: none;
 }
 
@@ -352,6 +353,44 @@ input:focus-visible {
 
 .balance-amount.is-negative {
   color: var(--loss);
+}
+
+/* The suggested-bet button: same as a stake, with a dashed "pencil" outline */
+.stake-suggested {
+  border-style: dashed;
+}
+
+/* ---------- Monthly goal ---------- */
+.goal-card {
+  margin-top: 22px;
+}
+
+.goal-line {
+  font-size: 1.15em;
+}
+
+.progress {
+  height: 18px;
+  border: 2px solid var(--ink);
+  border-radius: 9px 14px 8px 12px / 12px 8px 14px 9px;
+  background: transparent;
+  overflow: hidden;
+  margin: 8px 0 14px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: repeating-linear-gradient(-45deg, var(--accent) 0 6px, transparent 6px 9px);
+  transition: width 0.6s ease;
+}
+
+.goal-done {
+  font-family: var(--font-head);
+  color: var(--accent);
+}
+
+.popup-big .popup-title {
+  font-size: 1.5em;
 }
 
 /* Home's read-only "Money you have" (from the Diary) */

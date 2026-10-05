@@ -34,15 +34,24 @@ window.BY = window.BY || {};
   }
 
   // Actual spent = morning + income - night (a negative result counts as $0).
-  // Spending exactly the limit is a win. On a win, the unspent part is saved.
-  function settleDay(morning, income, night, limit) {
+  // Spending exactly the limit is a win. On a win, the unspent part is saved, but only
+  // up to the suggested bet (savingsCap), so a huge bet can't turn into fake savings.
+  function settleDay(morning, income, night, limit, savingsCap) {
     var actualSpent = Math.max(0, morning + income - night);
     var win = actualSpent <= limit;
+    var counted = typeof savingsCap === 'number' ? Math.min(limit, savingsCap) : limit;
     return {
       actualSpent: actualSpent,
       result: win ? 'win' : 'loss',
-      saved: win ? limit - actualSpent : 0
+      saved: win ? Math.max(0, counted - actualSpent) : 0
     };
+  }
+
+  // Suggested bet for the whole month: this month's starting money ÷ 30.
+  // Takes the starting money in cents; null if it hasn't been entered.
+  function suggestedBet(startingMoney) {
+    if (typeof startingMoney !== 'number') return null;
+    return Math.round(Math.max(0, startingMoney) / 30);
   }
 
   // 50 cents off today if the day before was a loss (including a missed day).
@@ -93,10 +102,16 @@ window.BY = window.BY || {};
     return { type: 'spending', amount: diaryBalance - night, note: 'Unlogged spending' };
   }
 
-  // Which pop-ups to show after a day is settled.
+  // True the first time this month's savings reach a goal that has been set.
+  function goalJustReached(goal) {
+    return !!goal && goal.amount > 0 && goal.saved >= goal.amount && !goal.monthlyAchieved;
+  }
+
+  // Which pop-ups to show after a day is settled (call after the day's savings are added).
   function achievementsFor(data, dayKey) {
     var kinds = [];
     if (data.days[dayKey] && data.days[dayKey].result === 'win') kinds.push('win');
+    if (goalJustReached(data.goal)) kinds.push('monthly');
     return kinds;
   }
 
@@ -107,11 +122,13 @@ window.BY = window.BY || {};
     limitFor: limitFor,
     incomeOn: incomeOn,
     settleDay: settleDay,
+    suggestedBet: suggestedBet,
     penaltyFor: penaltyFor,
     currentStreak: currentStreak,
     monthBalance: monthBalance,
     monthStartSuggestion: monthStartSuggestion,
     unloggedSpending: unloggedSpending,
+    goalJustReached: goalJustReached,
     achievementsFor: achievementsFor
   };
 })(window.BY);
