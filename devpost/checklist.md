@@ -72,12 +72,12 @@ Build mode: learn
 ## Hands-on Checkpoints
 
 - [x] Early usable behavior explored — after slice 2, the full bet → verdict → streak/penalty loop with the base look, while feedback can still shape the Diary, Streaks, and final look (done: learners tried win, penalty, and pop-up; worked, no changes requested)
-- [ ] Final kick-the-tires exploration and feedback completed
+- [x] Final kick-the-tires exploration and feedback completed (team explored freely; found the night-higher-than-Diary hole, fixed and retried)
 
 ## Final Review
 
-- [ ] Night balance higher than the Diary: warn before settling ("log it as income first") with **Log it in Diary** / **Settle anyway**; settling anyway adds "Unlogged income" to the Diary
-- [ ] Final review complete — feedback resolved and learner confirms ready to ship
+- [x] Night balance higher than the Diary: warn before settling ("log it as income first") with **Log it in Diary** / **Settle anyway**; settling anyway adds "Unlogged income" to the Diary
+- [x] Final review complete — feedback resolved and learner confirms ready to ship ("It's ready to ship, nothing else came up")
 
 ## Code Tour and App Map
 
