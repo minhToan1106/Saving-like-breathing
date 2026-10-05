@@ -78,6 +78,8 @@ Develops `scope.md > The Core Loop` (step 2).
 - **Actual spent = Morning balance + Income since the bet − Night balance.**
 - **Unlogged spending:** if the night balance is lower than the Diary balance, the app adds an "Unlogged spending" entry for the difference, so the Diary (and tomorrow's morning balance) matches the user's real money. The verdict note says so.
 - [ ] Example: Diary $90, night $84 → a $6 "Unlogged spending" entry is added and the Diary shows $84.
+- **More money than the Diary (decided in final review):** if the night balance is higher than the Diary balance, the app warns before settling: *"You have $10.00 more than your Diary says. If you got money today, log it as income first so it can't hide your spending."* **Log it in Diary** opens the Diary with Income selected (the typed night number is kept), and income logged there counts in tonight's verdict. **Settle anyway** settles as typed and adds an "Unlogged income" entry so the Diary matches real money.
+- [ ] Example: Diary $100, $50 from parents not logged, $40 spent, night $110 → warning; logging the $50 first gives $40 spent → **Lose** at a $3 limit.
 - Win if actual spent ≤ today's limit; lose otherwise. Spending exactly the limit counts as a win.
 - Diary *spending* entries are a record only. The night balance decides what was spent.
 - [ ] Example: morning $50, income $100 logged after the bet, night $130 → actual spent $20. With a $3 limit, the verdict is **Lose**.

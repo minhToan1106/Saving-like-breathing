@@ -8,6 +8,8 @@ window.BY = window.BY || {};
 
   // What the user has picked but not confirmed yet
   var ui = { stake: null, custom: false, suggested: false };
+  // The night balance typed so far, kept if the user goes to the Diary to log income
+  var nightDraft = '';
 
   function money(cents) {
     return BY.rules.formatMoney(cents);
@@ -255,21 +257,59 @@ window.BY = window.BY || {};
           '<input id="night-balance" inputmode="decimal" autocomplete="off" placeholder="e.g. 48.00">' +
           '<p class="field-error" id="night-error"></p>' +
         '</div>' +
+        '<div class="income-warning" id="income-warning" hidden>' +
+          '<p id="income-warning-text"></p>' +
+          '<div class="stakes">' +
+            '<button type="button" class="btn primary" id="log-income">Log it in Diary</button>' +
+            '<button type="button" class="btn" id="settle-anyway">Settle anyway</button>' +
+          '</div>' +
+        '</div>' +
         '<button type="button" class="btn primary" id="settle" disabled>Settle up</button>' +
       '</div>';
 
     var input = root.querySelector('#night-balance');
     var settleBtn = root.querySelector('#settle');
+    var warning = root.querySelector('#income-warning');
 
-    input.addEventListener('input', function () {
+    function check() {
       var night = BY.rules.parseMoney(input.value);
+      nightDraft = input.value;
       root.querySelector('#night-error').textContent = input.value.trim() && night === null ? BALANCE_ERROR : '';
       settleBtn.disabled = night === null;
-    });
+      warning.hidden = true;
+      settleBtn.hidden = false;
+    }
+    input.value = nightDraft;
+    check();
+    input.addEventListener('input', check);
 
+    // More money than the Diary says: ask the user to log the income first,
+    // so money they didn't log can't hide what they spent.
     settleBtn.addEventListener('click', function () {
       var night = BY.rules.parseMoney(input.value);
       if (night === null) return;
+      var diaryBalance = BY.rules.monthBalance(data, BY.dates.monthKey());
+      if (diaryBalance !== null && night > diaryBalance) {
+        root.querySelector('#income-warning-text').textContent =
+          'You have ' + money(night - diaryBalance) + ' more than your Diary says. ' +
+          'If you got money today, log it as income first so it can\u2019t hide your spending.';
+        warning.hidden = false;
+        settleBtn.hidden = true;
+        return;
+      }
+      settle(night);
+    });
+    root.querySelector('#log-income').addEventListener('click', function () {
+      BY.diary.startIncome();
+      BY.app.showScreen('diary');
+    });
+    root.querySelector('#settle-anyway').addEventListener('click', function () {
+      var night = BY.rules.parseMoney(input.value);
+      if (night !== null) settle(night);
+    });
+
+    function settle(night) {
+      nightDraft = '';
       var today = BY.dates.todayKey();
       var income = BY.rules.incomeOn(data, today, day.betAt);
       var outcome = BY.rules.settleDay(day.morningBalance, income, night, day.limit, day.suggested);
@@ -293,6 +333,18 @@ window.BY = window.BY || {};
         });
         day.unlogged = unlogged.amount;
       }
+      var extra = BY.rules.unloggedIncome(BY.rules.monthBalance(data, BY.dates.monthKey()), night);
+      if (extra) {
+        data.diary.entries.push({
+          id: 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          date: today,
+          type: extra.type,
+          amount: extra.amount,
+          note: extra.note,
+          at: day.settledAt
+        });
+        day.unloggedIncome = extra.amount;
+      }
       var kinds = BY.rules.achievementsFor(data, today);
       if (kinds.indexOf('monthly') !== -1) data.goal.monthlyAchieved = true;
       render(data);
@@ -300,7 +352,7 @@ window.BY = window.BY || {};
         BY.achievements.show(kind, data);
       });
       save(data);
-    });
+    }
   }
 
   // ---------- Demo: 30 days of success ----------
@@ -395,6 +447,9 @@ window.BY = window.BY || {};
           money(day.nightBalance) + ' tonight = ' + money(day.actualSpent) + ' spent</p>' +
         (day.unlogged
           ? '<p class="muted" id="unlogged-note">' + money(day.unlogged) + ' you didn\'t log was added to your Diary as unlogged spending.</p>'
+          : '') +
+        (day.unloggedIncome
+          ? '<p class="muted" id="unlogged-income-note">' + money(day.unloggedIncome) + ' more than your Diary was added to it as unlogged income.</p>'
           : '') +
         (win
           ? '<p class="muted">Protect your streak. A new bet opens at midnight.</p>'

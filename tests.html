@@ -144,6 +144,9 @@
         R.unloggedSpending(9000, 8400), { type: 'spending', amount: 600, note: 'Unlogged spending' });
       check('Night matches the Diary → nothing added', R.unloggedSpending(9000, 9000), null);
       check('Night higher than the Diary → nothing added', R.unloggedSpending(9000, 9500), null);
+      check('Night higher than the Diary → unlogged income for the difference',
+        R.unloggedIncome(10000, 11000), { type: 'income', amount: 1000, note: 'Unlogged income' });
+      check('Night matches or is lower → no unlogged income', [R.unloggedIncome(10000, 10000), R.unloggedIncome(10000, 9000)], [null, null]);
 
       // ---- New month suggestion ----
       check('Month before January is December', D.prevMonth('2026-01'), '2025-12');

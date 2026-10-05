@@ -376,6 +376,13 @@ input:focus-visible {
   stroke-linecap: round;
 }
 
+/* Night check-in: "you have more than your Diary says" */
+.income-warning {
+  border-left: 4px solid var(--accent);
+  padding: 4px 0 4px 14px;
+  margin: 6px 0 14px;
+}
+
 /* ---------- Demo corner ---------- */
 .demo-corner {
   margin: 26px auto 0;

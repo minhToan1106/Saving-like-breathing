@@ -138,6 +138,13 @@ window.BY = window.BY || {};
     return !!goal && goal.amount > 0 && goal.saved >= goal.amount && !goal.monthlyAchieved;
   }
 
+  // At settle: if the night balance is higher than the Diary says, money came in without
+  // being logged. Returns the Diary entry to add, or null. (Home warns before this happens.)
+  function unloggedIncome(diaryBalance, night) {
+    if (diaryBalance === null || night <= diaryBalance) return null;
+    return { type: 'income', amount: night - diaryBalance, note: 'Unlogged income' };
+  }
+
   // Which pop-ups to show after a day is settled (call after the day's savings are added).
   function achievementsFor(data, dayKey) {
     var kinds = [];
@@ -162,6 +169,7 @@ window.BY = window.BY || {};
     monthBalance: monthBalance,
     monthStartSuggestion: monthStartSuggestion,
     unloggedSpending: unloggedSpending,
+    unloggedIncome: unloggedIncome,
     GRAND_STREAK: GRAND_STREAK,
     demoDays: demoDays,
     goalJustReached: goalJustReached,

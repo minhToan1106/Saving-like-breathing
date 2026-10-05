@@ -20,7 +20,7 @@ Your data stays in your browser on this device (`localStorage`). Nothing is sent
 - **Diary:** enter the money you have this month once. Then log spending and income. This is your one balance.
 - **Morning bet:** tap $2 / $3 / $5 / $10 / Custom, or the **Suggested** bet (this month's money ÷ 30). Your Diary balance is locked in as the morning balance.
 - **Night check-in** (from 7 PM): type the money you really have. *Actual spent = morning balance + income logged since the bet − tonight's balance.* Spend no more than your limit to win.
-- If tonight's number is lower than the Diary, the difference is added as **Unlogged spending**, so the Diary stays true.
+- If tonight's number is lower than the Diary, the difference is added as **Unlogged spending**, so the Diary stays true. If it's higher, the app asks you to log that income first, so money you didn't log can't hide what you spent.
 - **Savings:** each win adds what you didn't spend, counted only up to the suggested bet, so a huge bet can't fake your savings.
 - **Streaks:** a full-year grid of wins (green), losses (red), and missed days. A missed check-in counts as a loss.
 - **Day/night:** the toggle at the top right switches between the sepia day look and the dark night look, and remembers your choice.

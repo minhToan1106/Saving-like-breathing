@@ -76,6 +76,7 @@ Build mode: learn
 
 ## Final Review
 
+- [ ] Night balance higher than the Diary: warn before settling ("log it as income first") with **Log it in Diary** / **Settle anyway**; settling anyway adds "Unlogged income" to the Diary
 - [ ] Final review complete — feedback resolved and learner confirms ready to ship
 
 ## Code Tour and App Map
@@ -102,3 +103,4 @@ Activity mode:
 - Slice 4 added a **suggested bet and a savings cap**: the team found that betting $100 against a $95 goal and spending $5 reached the monthly goal in one day. Team decision: suggested bet = this month's starting money ÷ 30, fixed for the month, and savings per win = min(limit, suggested bet) − spent, never below $0. Win/lose and streaks are unchanged, so high spenders can still bet high. Updated `prd.md` (Monthly Goal, Product Decisions) and `spec.md` (Rules, Home Screen, Data Model). Slice 5's "Skip to 30 days" adds demo savings directly; check its learner check against the cap when building it.
 - Slice 5: demo days go through the same savings cap as real days (`rules.demoDays` uses `settleDay` with this month's suggested bet), so the demo can't show savings the team's rule wouldn't allow; with $300 starting money (suggested $10) it still saves about $150. The learner check now enters $300 first. The 30-day achievement counts the streak ending on the settled day (`streakEndingOn`), which a unit test caught.
 - Slice 5's Streaks grid now covers the **whole current year (January–December)** as a contribution-style graph split into 12 month blocks with gaps between them, not just last month through today. The team asked for it after trying the grid so users can see the full view. Updated `prd.md > Streak Viewer` and `spec.md > Streak Viewer`.
+- Final review: the team found that a night balance higher than the Diary had no rule. Added a warning before settling (**Log it in Diary** / **Settle anyway**) and an automatic "Unlogged income" entry when settling anyway, so unlogged money can't quietly hide spending. Updated `prd.md > Night Check-in and Verdict`, `spec.md` (Rules, Home Screen), and `README.md`. Note: `prd.html` and `spec.html` (review companions) still show the original plan; the `.md` files are current.

@@ -178,5 +178,10 @@ window.BY = window.BY || {};
     });
   }
 
-  BY.diary = { render: render };
+  // Opened from the night warning: start with Income selected
+  function startIncome() {
+    entryType = 'income';
+  }
+
+  BY.diary = { render: render, startIncome: startIncome };
 })(window.BY);
