@@ -81,15 +81,15 @@ Build mode: learn
 
 ## Code Tour and App Map
 
-- [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
+- [x] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
 - [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
+- [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
-Activity and evidence:
-Route and stops:
-Edit outcome:
+Activity and evidence: guided route following "Settle up" through the code, connected to the team's goal of learning to work with an agent (knowing where behavior lives makes it possible to point an agent at it and review its change). The team reported going through all three stops.
+Route and stops: 1. `js/home.js` → `function settle(night)` (and the `settleBtn` click handler with the income warning); 2. `js/rules.js` → `function settleDay`; 3. `js/storage.js` → `function saveData`. All three completed.
+Edit outcome: offered (change "You beat yourself today." in `renderVerdict`); the team skipped it.
 Reflection:
-Activity mode:
+Activity mode: learn mode, guided route. App map at `devpost/app-map.html` (snapshot of commit 8d035d0; anchors checked against source; renders offline with no external requests).
 
 ## Open Decisions
 

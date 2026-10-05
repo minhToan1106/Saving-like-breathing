@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat Yourself App Map</title>
+<style>
+  :root {
+    --bg: #efe5cf; --card: #f8f1e1; --ink: #2a1f16; --soft: #5e4a35;
+    --accent: #8b3a1e; --line: #b9a27c; --code: #e8dcc2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #16120e; --card: #221b14; --ink: #e6d8bd; --soft: #b5a283;
+      --accent: #d9824f; --line: #5a4a38; --code: #2c241b; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 17px/1.55 Georgia, "Times New Roman", serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 2.1em; margin: 0 0 4px; }
+  h2 { font-size: 1.35em; margin: 36px 0 10px; color: var(--accent); }
+  p, li { max-width: 70ch; }
+  .lede { color: var(--soft); margin-top: 0; }
+  .card { background: var(--card); border: 2px solid var(--ink); border-radius: 14px 6px 16px 8px;
+    padding: 16px 20px; margin: 14px 0; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 0.9em; background: var(--code);
+    padding: 1px 5px; border-radius: 4px; }
+  ol.route > li { margin-bottom: 16px; }
+  .where { display: block; font-family: Consolas, "Courier New", monospace; font-size: 0.88em; color: var(--accent); }
+  svg { width: 100%; height: auto; display: block; }
+  svg text { fill: var(--ink); font: 14px Georgia, serif; }
+  svg .box { fill: var(--card); stroke: var(--ink); stroke-width: 2; }
+  svg .file { fill: var(--accent); font: 12px Consolas, monospace; }
+  svg .arrow { stroke: var(--ink); stroke-width: 2; fill: none; marker-end: url(#head); }
+  svg #head path { fill: var(--ink); }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--soft); font-weight: normal; font-style: italic; }
+  details { margin: 8px 0; }
+  summary { cursor: pointer; color: var(--accent); }
+  summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .small { font-size: 0.9em; color: var(--soft); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Beat Yourself: App Map</h1>
+  <p class="lede">A take-home guide to where things live in the code, so you know where to look (or where to point an agent) when you want to change something.</p>
+
+  <h2>What the app is</h2>
+  <p>A morning bet against yourself ("Today I'll spend no more than $3") and a night check-in that decides Win or Lose. Wins build a streak and add to a monthly saving goal. The Diary holds your one balance. Everything runs in the browser, with no server, and is saved on this device.</p>
+  <div class="card">
+    <p><strong>The main pieces</strong></p>
+    <ul>
+      <li><code>index.html</code>: the page, sidebar, and the order scripts load in.</li>
+      <li><code>js/home.js</code>, <code>js/diary.js</code>, <code>js/streaks.js</code>: the three screens.</li>
+      <li><code>js/rules.js</code>: all the money math, with no screen and no storage.</li>
+      <li><code>js/storage.js</code>: the only file that saves or loads data.</li>
+      <li><code>js/catchup.js</code>: on open, fills missed days as losses and resets savings in a new month.</li>
+      <li><code>js/achievements.js</code>, <code>js/theme.js</code>, <code>js/app.js</code>: pop-ups, day/night, and startup plus navigation.</li>
+      <li><code>tests.html</code>: checks the rules against the product's examples.</li>
+    </ul>
+  </div>
+
+  <h2>One action, end to end: tapping "Settle up"</h2>
+  <div class="card">
+    <svg viewBox="0 0 820 230" role="img" aria-labelledby="flow-title flow-desc">
+      <title id="flow-title">How Settle up flows through the code</title>
+      <desc id="flow-desc">You type tonight's balance and tap Settle up. home.js settle collects the numbers, rules.js settleDay decides win or lose and savings, storage.js saveData remembers it, and the Win or Lose card appears.</desc>
+      <defs><marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z"/></marker></defs>
+      <rect class="box" x="10" y="20" width="170" height="80" rx="12"/>
+      <text x="95" y="52" text-anchor="middle">You type tonight's</text>
+      <text x="95" y="72" text-anchor="middle">balance, tap Settle up</text>
+      <rect class="box" x="225" y="20" width="170" height="80" rx="12"/>
+      <text x="310" y="50" text-anchor="middle">Collect the numbers</text>
+      <text class="file" x="310" y="78" text-anchor="middle">home.js · settle()</text>
+      <rect class="box" x="440" y="20" width="170" height="80" rx="12"/>
+      <text x="525" y="50" text-anchor="middle">Decide Win / Lose</text>
+      <text class="file" x="525" y="78" text-anchor="middle">rules.js · settleDay()</text>
+      <rect class="box" x="640" y="20" width="170" height="80" rx="12"/>
+      <text x="725" y="50" text-anchor="middle">Remember it</text>
+      <text class="file" x="725" y="78" text-anchor="middle">storage.js · saveData()</text>
+      <rect class="box" x="440" y="140" width="370" height="70" rx="12"/>
+      <text x="625" y="170" text-anchor="middle">Win / Lose card, pop-ups, streak, savings</text>
+      <text class="file" x="625" y="194" text-anchor="middle">home.js · renderVerdict(), renderGoal()</text>
+      <path class="arrow" d="M180 60H222"/>
+      <path class="arrow" d="M395 60H437"/>
+      <path class="arrow" d="M610 60H637"/>
+      <path class="arrow" d="M310 100V175H437"/>
+    </svg>
+  </div>
+
+  <h2>The route you followed</h2>
+  <p class="small">Use Ctrl+F in your editor to search for the bold text. Line numbers can drift as the code changes; the names won't.</p>
+  <ol class="route">
+    <li><strong>Where the tap lands.</strong>
+      <span class="where">js/home.js → search: function settle(night)</span>
+      Collects today's morning balance, income logged since the bet, and tonight's number. It also adds "Unlogged spending" or "Unlogged income" so the Diary matches real money. Just above it, the <code>settleBtn</code> click handler shows the "more than your Diary" warning first.</li>
+    <li><strong>The decision.</strong>
+      <span class="where">js/rules.js → search: function settleDay</span>
+      The verdict formula: spent = morning + income − night (never below $0). Win if spent ≤ limit. Savings = the smaller of the limit and the suggested bet, minus spent. Pure math, which is why <code>tests.html</code> can check it.</li>
+    <li><strong>Where it's remembered.</strong>
+      <span class="where">js/storage.js → search: function saveData</span>
+      The only place the app writes to <code>localStorage</code>. Moving to online storage later means rewriting this file.</li>
+  </ol>
+
+  <h2>To change this, start here</h2>
+  <table>
+    <thead><tr><th>If you want to change…</th><th>Start in</th></tr></thead>
+    <tbody>
+      <tr><td>Win / Lose wording ("You beat yourself today.")</td><td><code>js/home.js</code> → <code>renderVerdict</code></td></tr>
+      <tr><td>The verdict formula or savings cap</td><td><code>js/rules.js</code> → <code>settleDay</code>, then add an example to <code>tests.html</code></td></tr>
+      <tr><td>The suggested bet (money ÷ 30)</td><td><code>js/rules.js</code> → <code>suggestedBet</code></td></tr>
+      <tr><td>The $0.50 penalty</td><td><code>js/rules.js</code> → <code>PENALTY</code>, <code>penaltyFor</code></td></tr>
+      <tr><td>The stake buttons ($2 / $3 / $5 / $10)</td><td><code>js/home.js</code> → <code>STAKES</code>, <code>renderBet</code></td></tr>
+      <tr><td>When the night check-in opens (7 PM)</td><td><code>js/dates.js</code> → <code>NIGHT_UNLOCK_HOUR</code></td></tr>
+      <tr><td>The Diary balance or monthly question</td><td><code>js/rules.js</code> → <code>monthBalance</code>; <code>js/diary.js</code> → <code>render</code></td></tr>
+      <tr><td>The year grid on Streaks</td><td><code>js/streaks.js</code> → <code>render</code>; styles under <code>.month</code> in <code>css/components.css</code></td></tr>
+      <tr><td>Colors for day or night</td><td><code>css/theme.css</code> (every color is a variable)</td></tr>
+      <tr><td>Saving data somewhere else</td><td><code>js/storage.js</code> → <code>loadData</code>, <code>saveData</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>A practice to reuse</h2>
+  <div class="card">
+    <p><strong>Before approving an agent's design, ask it to walk through one concrete example with real numbers. Then keep that example as a test.</strong></p>
+    <p>In this build, a $5 coffee before the bet and a $5 lunch after it were walked through before any code changed. That example showed two things: spending before the bet falls outside it, which the team accepted as a gap, and income logged before the bet would be counted twice. The same numbers now live in <code>tests.html</code> ("Coffee before the bet → morning $95; lunch after → $5 spent" and "Income logged before the bet is not counted twice"). The same habit caught the $100-bet savings loophole ("The cheat: bet $100, spend $5…").</p>
+    <p>On another project, the move is the same: ask for a worked example before saying yes, look for the case that feels wrong, and turn it into a check the agent has to pass.</p>
+  </div>
+
+  <h2>Run it again</h2>
+  <ul>
+    <li>Double-click <code>index.html</code>. If data doesn't stick, use VS Code's Live Server extension.</li>
+    <li>Fresh start: F12 → Console → <code>localStorage.clear()</code> → Enter → refresh.</li>
+    <li>Check the math: open <code>tests.html</code> (84 checks at the time of this map).</li>
+    <li>Reopen this map any time: <code>devpost/app-map.html</code>.</li>
+  </ul>
+  <details>
+    <summary>About this map</summary>
+    <p class="small">A snapshot of the code at commit <code>8d035d0</code> (October 2026). It can drift as the app changes; the function names are the most reliable anchors.</p>
+  </details>
+</main>
+</body>
+</html>
