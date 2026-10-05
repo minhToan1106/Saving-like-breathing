@@ -13,10 +13,10 @@ Develops `scope.md > The Core Loop` and `scope.md > What "Working" Looks Like`.
 
 1. **Arrive.** The user opens the web app. A sidebar on the left lists **Home**, **Diary**, and **Streaks**. Home is open.
 2. **The hook.** On Home, the question *"Do you think you can beat yourself?"* drops in from the top half of the screen.
-3. **Morning bet.** In the bottom half, the user reads *"Today I'll spend no more than…"*, taps **$2 | $3 | $5 | $10 | Custom**, and enters their **morning balance**. Below that, they can set a **monthly saving goal** (e.g. $600).
+3. **Morning bet.** In the bottom half, the user reads *"Today I'll spend no more than…"*, taps **$2 | $3 | $5 | $10 | Custom**, and sees their **morning balance**, which is simply their Diary balance (typed by hand only on the very first day and once at the start of each month). Below that, they can set a **monthly saving goal** (e.g. $600).
 4. **During the day (optional).** In **Diary**, the user logs money going out (spending) and money coming in (income). The diary balance goes down or up with each entry.
 5. **Night check-in.** At night (or right away via the **"Skip to tonight"** demo button), the user enters their **night balance**.
-6. **Verdict.** The app calculates **Actual spent = Morning balance + Income today − Night balance** and compares it with today's limit.
+6. **Verdict.** The app calculates **Actual spent = Morning balance + Income logged since the bet − Night balance** and compares it with today's limit. If the night balance is lower than the Diary balance, the difference is added to the Diary as "Unlogged spending."
    - **Win** (actual spent ≤ limit): the streak goes up by 1, a small achievement pops up, and the unspent amount (limit − actual spent) is added to this month's savings.
    - **Lose** (actual spent > limit): the streak resets to 0, and tomorrow's bet carries a $0.50 penalty.
 7. **Look back.** In **Streaks**, the user sees an activity grid (green win, red loss, gray no data) and their current streak.
@@ -46,13 +46,20 @@ Source: learner's design direction during the PRD interview, building on `scope.
 ### Morning Bet
 Develops `scope.md > The Core Loop` (step 1).
 - The user sees *"Today I'll spend no more than…"* with buttons **$2, $3, $5, $10, Custom**. Custom lets them type an amount.
-- The user enters their **morning balance**.
+- **One balance.** The **morning balance** is the Diary balance ("Money you have: $95.00, from your Diary"). It isn't typed; a "Fix it in Diary" link opens the Diary to correct it. Logging in the Diary before the bet updates it right away.
+  - **First day ever, or first bet of a new month** (no starting money for this month yet): Home asks "Money you have this month" right there, pre-filled with where last month's Diary ended when there is one. Locking in saves it as this month's Diary starting money.
+  - **Locking in freezes the morning balance** for the day. Later Diary entries change the Diary, not today's morning balance.
+  - **The bet covers from the moment it's locked in until the night check-in.** *Known gap, accepted by the team:* spending done before the bet doesn't count against any day.
+- [ ] Example: Diary $100, a $5 coffee logged before the bet → Home shows $95 and the bet saves $95; a $5 lunch logged after → the Diary shows $90 but the morning balance stays $95; night $90 → $5 spent → **Lose** at a $3 limit.
 - Only one bet type exists: "spend no more than."
 - **Penalty after a loss:** the morning after a loss (including a missed check-in), the user sees a notice like *"Because you lost yesterday, you have a penalty today: $0.50 comes off your spending limit."* Whatever they tap, today's limit is $0.50 lower (tap $3 → limit $2.50). The penalty is a flat $0.50 and does not stack.
 - [ ] On Home, the bet sentence and all five buttons are visible, and tapping one clearly marks it as selected.
 - [ ] Choosing Custom lets the user type an amount.
 - [ ] After a loss, the next morning shows the penalty notice, and the confirmed limit is the tapped amount − $0.50.
 - [ ] The bet can't be confirmed without an amount and a valid morning balance.
+- [ ] After settling with a night balance of $48, the next morning's balance field shows $48.00, and the user can change it before confirming.
+- [ ] On the very first day, the morning balance field is empty.
+- [ ] After a skipped day, the field shows the latest night balance and says which day it's from.
 
 ### Monthly Goal
 - Below the morning bet, the user can set a monthly saving goal (e.g. $600).
@@ -65,11 +72,13 @@ Develops `scope.md > The Core Loop` (step 1).
 ### Night Check-in and Verdict
 Develops `scope.md > The Core Loop` (step 2).
 - The user enters their **night balance**.
-- **Income today** = the sum of today's income entries in the Diary.
-- **Actual spent = Morning balance + Income today − Night balance.**
+- **Income since the bet** = the sum of today's Diary income entries logged after the bet was locked in. Income logged before the bet is already inside the morning balance, so it isn't counted twice.
+- **Actual spent = Morning balance + Income since the bet − Night balance.**
+- **Unlogged spending:** if the night balance is lower than the Diary balance, the app adds an "Unlogged spending" entry for the difference, so the Diary (and tomorrow's morning balance) matches the user's real money. The verdict note says so.
+- [ ] Example: Diary $90, night $84 → a $6 "Unlogged spending" entry is added and the Diary shows $84.
 - Win if actual spent ≤ today's limit; lose otherwise. Spending exactly the limit counts as a win.
 - Diary *spending* entries are a record only. The night balance decides what was spent.
-- [ ] Example: morning $50, income $100, night $130 → actual spent $20. With a $3 limit, the verdict is **Lose**.
+- [ ] Example: morning $50, income $100 logged after the bet, night $130 → actual spent $20. With a $3 limit, the verdict is **Lose**.
 - [ ] Example: morning $50, no income, night $48 → actual spent $2. With a $3 limit, the verdict is **Win**.
 - [ ] The verdict appears on screen right after the night balance is entered.
 
@@ -85,13 +94,16 @@ Develops `scope.md > The Unique Kernel`.
 - [ ] Reaching a 30-day streak shows the grand achievement.
 
 ### Diary
-- The top shows the current balance. The user enters their starting balance for the month.
+- **"Money you have this month"** is entered **once**: on first use, and again at the start of each new month. At the start of a new month, the question is pre-filled with where last month's Diary ended. It can be answered in the Diary or on Home before the bet. A small "fix" link allows correcting a typo.
+- The top shows this month's balance: money you had this month + this month's income − this month's spending.
 - The user adds entries marked as **spending** (balance goes down) or **income** (balance goes up), each with an amount.
-- The user can see the entries they've added.
-- Today's income entries feed into the night verdict (see **Night Check-in and Verdict**).
+- The user can see the entries they've added. Earlier months' entries stay saved but don't count toward this month's balance.
+- The Diary balance is Home's morning balance. Income logged after today's bet feeds the night verdict, and settling can add an "Unlogged spending" entry (see **Night Check-in and Verdict**).
 - *Assumption:* each entry has a short description ("bubble tea") plus an amount.
+- [ ] On first use, the Diary asks for the money you have this month, and doesn't ask again that month.
+- [ ] On the first open in a new month, it asks again, pre-filled with where last month's Diary ended.
 - [ ] Adding a $4 spending entry lowers the shown balance by exactly $4.
-- [ ] Adding a $100 income entry raises the shown balance by exactly $100, and it counts in tonight's "Income today."
+- [ ] Adding a $100 income entry raises the shown balance by exactly $100, and, if logged after the bet, it counts in tonight's "Income since the bet."
 - [ ] New entries appear in the visible list.
 
 ### Streak Viewer
@@ -114,7 +126,8 @@ Develops `scope.md > What "Working" Looks Like`.
 
 ## States and Boundaries
 
-- **First use:** no streak (0), Streaks grid all gray, Diary empty with a short prompt to add a first entry, and the hook question on Home.
+- **First use:** no streak (0), Streaks grid all gray, Diary and Home both ask for the money you have this month (answering either one is enough), the Diary shows a short prompt to add a first entry, and Home shows the hook question.
+- **New month:** savings reset to $0, and the Diary and Home ask again for the money you have this month (pre-filled with where last month's Diary ended).
 - **Before the morning bet:** Home shows the bet area. The night check-in is not available yet.
 - **After the morning bet, before night:** Home shows today's bet and limit. The night check-in unlocks at **7 PM** (decided in `4-spec`, replacing the earlier 10 PM assumption from `scope.md > The Core Loop`, so users have more time to settle before midnight), and "Skip to tonight" unlocks it early.
 - **After the verdict:** Home shows today's result until midnight. A new day starts at 00:00.
@@ -131,6 +144,8 @@ Develops `scope.md > What "Working" Looks Like`.
 - **Keep the diary in this first build**, and make room by cutting font settings and login.
 - **The night balance decides the verdict.** Diary spending entries are a record only.
 - **The diary records income too**, and today's income feeds the formula *Actual spent = Morning + Income today − Night*. Reason: getting paid shouldn't hide overspending ("saving is not necessarily related to income").
+- **Type money numbers as rarely as possible** (decided during `5-build`). "Money you have this month" is entered once per month. Reason: even logging in is a big ask for these users (`scope.md > Who It's For`).
+- **One balance** (decided during `5-build`). The morning balance is the Diary balance, frozen when the bet is locked in, because two different "money you have" numbers would confuse users. The bet covers from lock-in to the night check-in. Settling adds any shortfall to the Diary as "Unlogged spending" so the one balance stays true.
 - **One bet type, "spend no more than,"** with $2 / $3 / $5 / $10 / Custom buttons that you tap, to keep the morning quick.
 - **Loss penalty = $0.50 off the next day's limit**, shown in a morning notice. This replaces scope's "tomorrow's stakes get harder" with a concrete rule.
 - **A missed check-in counts as a loss.**

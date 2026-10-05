@@ -24,10 +24,10 @@ Traces `prd.md > The Core Journey`.
 
 1. **Arrive.** You double-click `index.html`. `app.js` starts → `storage.loadData()` reads the data object from `localStorage` (or creates a fresh empty one on first use) → `catchup.run()` fills in missed days and checks the month → the theme saved last time is applied → **Home** is shown.
 2. **The hook.** `home.js` shows *"Do you think you can beat yourself?"*, and a CSS animation drops it in from the top.
-3. **Morning bet.** If yesterday was a loss, `rules.penaltyFor(today)` says so, and Home shows the penalty notice first. You tap $2 / $3 / $5 / $10 / Custom and type your morning balance → `home.js` checks the input → `rules.limitFor(stake, penalty)` gives today's limit (e.g. $3 − $0.50 = $2.50) → today's record is saved through `storage.saveData()`. The monthly goal input sits underneath and saves the same way.
+3. **Morning bet.** If yesterday was a loss, `rules.penaltyFor(today)` says so, and Home shows the penalty notice first. You tap $2 / $3 / $5 / $10 / Custom. The morning balance is the Diary balance from `rules.monthBalance()` (if this month has no starting money yet, Home asks for it, pre-filled from `rules.monthStartSuggestion()`) → `rules.limitFor(stake, penalty)` gives today's limit (e.g. $3 − $0.50 = $2.50) → today's record is saved with `morningBalance` (frozen) and `betAt` through `storage.saveData()`. The monthly goal input sits underneath and saves the same way.
 4. **During the day (optional).** In **Diary** you add "bubble tea, $4, spending" or "part-time pay, $100, income" → `diary.js` adds it to the entries list with today's date → saved → the balance at the top updates.
 5. **Night check-in.** At **7 PM or later**, or right away after tapping **"Skip to tonight"**, Home shows the night balance input.
-6. **Verdict.** You enter the night balance → `rules.settleDay()` adds up today's Diary income, works out actual spent, compares it with the limit, and returns win or lose plus the saved amount → today's record gets the result → on a win, savings go up by (limit − actual spent) → `achievements.js` shows the pop-up (small win, 30-day grand, or monthly goal) → saved.
+6. **Verdict.** You enter the night balance → `rules.incomeOn(data, today, betAt)` adds up income logged since the bet → `rules.settleDay()` works out actual spent, compares it with the limit, and returns win or lose plus the saved amount → today's record gets the result → `rules.unloggedSpending()` adds any shortfall to the Diary → on a win, savings go up by (limit − actual spent) → `achievements.js` shows the pop-up (small win, 30-day grand, or monthly goal) → saved.
 7. **Look back.** In **Streaks**, `streaks.js` reads the day records and draws the grid (green win, red loss, gray no data) and the current streak.
 8. **Demo shortcut.** **"Skip to 30 days of success"** writes 30 winning sample days ending yesterday, adds their savings to this month, and shows the grand achievement (and the monthly one if the goal is reached).
 
@@ -97,9 +97,12 @@ PRD ref: `prd.md > States and Boundaries`.
 Pure math with no screen and no storage, so it can be tested on its own. All money is handled in **cents** (whole numbers) so $3.00 − $0.50 never turns into 2.4999999.
 - `penaltyFor(data, dayKey)` → 50 cents if the previous day's record is a loss, otherwise 0. Flat; doesn't stack. There's no penalty on the first day of use.
 - `limitFor(stakeCents, penaltyCents)` → `max(0, stake − penalty)`.
-- `incomeOn(data, dayKey)` → the sum of that day's Diary income entries.
+- `incomeOn(data, dayKey, sinceTime)` → the sum of that day's Diary income entries; with `sinceTime` (the bet's `betAt`), only entries logged after it (entries without a time still count).
 - `settleDay(morning, income, night, limit)` → `actualSpent = max(0, morning + income − night)`. Win if `actualSpent ≤ limit`. `saved = limit − actualSpent` on a win, 0 on a loss.
 - `currentStreak(data)` → the number of consecutive wins counting back from the latest settled day.
+- `monthBalance(data, month)` → that month's starting money + its income − its spending, or `null` if the month has no starting money yet. This is both the Diary balance and Home's morning balance.
+- `monthStartSuggestion(data, month)` → where last month's Diary ended (`monthBalance` of the previous month), or `null`.
+- `unloggedSpending(diaryBalance, night)` → `{ type: 'spending', amount: diaryBalance − night, note: 'Unlogged spending' }` when the night balance is lower, otherwise `null`.
 - `achievementsFor(...)` → which pop-ups to show: `win` on every win, `grand30` when the streak reaches 30, `monthly` when saved-this-month first reaches the goal.
 PRD ref: `prd.md > Night Check-in and Verdict`, `prd.md > Morning Bet` (penalty), `prd.md > Streaks and Achievements`, `prd.md > Monthly Goal`.
 
@@ -113,15 +116,15 @@ PRD ref: `prd.md > Streaks and Achievements` (missed check-in), `prd.md > Monthl
 
 ### Home Screen (`js/home.js`)
 Shows one of four states, based on today's record and the clock:
-1. **Before the bet:** hook, penalty notice if any, the bet sentence with $2 / $3 / $5 / $10 / Custom (the selected button is clearly marked), morning balance input, Confirm (disabled until valid).
+1. **Before the bet:** hook, penalty notice if any, the bet sentence with $2 / $3 / $5 / $10 / Custom (the selected button is clearly marked), "Money you have" shown read-only from the Diary with a "Fix it in Diary" link (or, if this month has no starting money, a "Money you have this month" input pre-filled from `rules.monthStartSuggestion()`), Confirm (disabled until valid).
 2. **Bet placed, before 7 PM:** today's stake and limit, "Night check-in opens at 7 PM", **Skip to tonight**.
-3. **Night open:** night balance input → Settle.
+3. **Night open:** income logged since the bet, night balance input → Settle (adds unlogged spending to the Diary if the night balance is lower).
 4. **Settled:** the verdict (Win / Lose, actual spent vs. limit) until midnight.
 The **Monthly Goal** card (goal input, saved-this-month, progress) is always below. The **Skip to 30 days of success** button sits in a small, clearly labeled "Demo" corner.
 PRD ref: `prd.md > Morning Bet`, `prd.md > Monthly Goal`, `prd.md > Night Check-in and Verdict`, `prd.md > Demo Buttons`.
 
 ### Diary Screen (`js/diary.js`)
-Top: current balance = starting balance + all income − all spending, plus an editable starting balance. Bottom: an add-entry form (description, amount, Spending / Income), and the list of entries with the newest first. When empty, it shows a short prompt to add a first entry. Entries are only a record. Only today's **income** entries feed the verdict.
+Top: if this month has no starting money yet (first use, or the first open in a new month), a "Money you have this month" question, pre-filled from `rules.monthStartSuggestion()` when there is one. Once answered, it shows this month's balance = this month's starting money + this month's income − this month's spending, with a small "fix" link to correct the starting money. Bottom: an add-entry form (description, amount, Spending / Income), and the list of this month's entries with the newest first (earlier months stay saved). When empty, it shows a short prompt to add a first entry. The balance is also Home's morning balance. Income logged after today's bet feeds the verdict.
 PRD ref: `prd.md > Diary`.
 
 ### Streak Viewer (`js/streaks.js`)
@@ -138,11 +141,11 @@ PRD ref: `prd.md > Day/Night Toggle`.
 
 ### Demo Buttons (in `js/home.js`)
 - **Skip to tonight:** sets `data.demoNightUnlocked = todayKey()`. Night opens immediately for today only.
-- **Skip to 30 days of success:** **sample data, labeled `demo: true`.** Writes 30 winning day records ending yesterday (stake $10, limit $10, actual spent from a fixed pattern of $3–$7, so about $150 saved in total). It replaces any records on those dates, moves the start date back if needed, adds the 30 saved amounts to this month's savings, then shows `grand30`, and `monthly` if the goal is reached. Today stays as it was.
+- **Skip to 30 days of success:** **sample data, labeled `demo: true`.** Writes 30 winning day records ending yesterday (stake $10, limit $10, actual spent from a fixed pattern of $3–$7, so about $150 saved in total). Demo days carry no balances (`null`), so they never become the morning pre-fill. It replaces any records on those dates, moves the start date back if needed, adds the 30 saved amounts to this month's savings, then shows `grand30`, and `monthly` if the goal is reached. Today stays as it was.
 PRD ref: `prd.md > Demo Buttons`.
 
 ### Rules Check Page (`tests.html`)
-A plain page that loads `js/dates.js` and `js/rules.js` and runs the PRD's examples, showing PASS / FAIL for each: morning $50 + income $100 − night $130 = $20 spent → Lose at a $3 limit; morning $50 − night $48 = $2 → Win at $3; $3 tap after a loss → $2.50 limit; $0.50 custom bet with penalty → $0 limit; a negative spend counts as $0 → Win. A development aid for checking the agent's math, not part of the app.
+A plain page that loads `js/dates.js` and `js/rules.js` and runs the PRD's examples, showing PASS / FAIL for each: morning $50 + income $100 − night $130 = $20 spent → Lose at a $3 limit; morning $50 − night $48 = $2 → Win at $3; $3 tap after a loss → $2.50 limit; $0.50 custom bet with penalty → $0 limit; a negative spend counts as $0 → Win; the morning pre-fill (last night, after a skipped day, first day, demo days ignored); and the Diary's per-month balance. A development aid for checking the agent's math, not part of the app.
 PRD ref: `prd.md > Night Check-in and Verdict` (acceptance examples), `prd.md > States and Boundaries`.
 
 ## Data Model
@@ -159,20 +162,23 @@ Everything is kept together in one object, saved as JSON under the `localStorage
       stake: 300,                  // tapped amount
       penalty: 50,                 // 0 or 50
       limit: 250,                  // max(0, stake - penalty)
-      morningBalance: 5000,
+      morningBalance: 5000,        // Diary balance when the bet was locked in
+      betAt: 1791130000000,        // when the bet was locked in
       nightBalance: 4800,          // null until settled
-      income: 0,                   // today's diary income, captured at settle
+      income: 0,                   // diary income logged since the bet, captured at settle
+      unlogged: 0,                 // unlogged spending added to the Diary at settle
       actualSpent: 200,
       result: "win",               // "win" | "loss" | null (open)
       saved: 50,
+      settledAt: 1791158400000,    // when Settle was tapped (null until settled)
       missed: false,               // true if filled in by catch-up
       demo: false                  // true for "Skip to 30 days" sample days
     }
   },
   diary: {
-    startingBalance: 20000,
+    startingBalances: { "2026-10": 20000 },   // "money you have this month", one per month
     entries: [
-      { id: "e1", date: "2026-10-04", type: "spending", amount: 400, note: "bubble tea" }
+      { id: "e1", date: "2026-10-04", type: "spending", amount: 400, note: "bubble tea", at: 1791140000000 }  // at = when logged
     ]
   },
   goal: { amount: 60000, month: "2026-10", saved: 50, monthlyAchieved: false },
@@ -186,7 +192,8 @@ Everything is kept together in one object, saved as JSON under the `localStorage
 | Today's bet and verdict | `days[today]` | Confirm bet, Settle | Still there; Home shows the right state |
 | Day history | `days` | Settle, catch-up, demo | Kept; missed days filled as losses |
 | Streak | **calculated** from `days` | — | Always matches the history |
-| Diary entries and balance | `diary` | Add entry, edit starting balance | Kept |
+| Diary entries and balance | `diary` | Add entry, answer or fix this month's starting money | Kept; a new month asks for new starting money |
+| Morning balance | **calculated** from `diary` before the bet; frozen in `days[today].morningBalance` at lock-in | Lock in | Same as the Diary |
 | Monthly goal and savings | `goal` | Goal input, win, demo | Kept; reset when the month changes |
 | Achievements | `achievements` | Pop-ups | Kept |
 | Theme | `theme` | Toggle | Applied on open |
@@ -256,7 +263,8 @@ Script load order in `index.html`: storage → dates → rules → catchup → a
 - Money stored as cents. Streak calculated, not stored. One storage key.
 - Catch-up also runs on window focus. Demo sample-day values (stake $10, spent $3–$7).
 - A `tests.html` rules check page, to verify the agent's math against the PRD examples.
-- The diary balance doesn't reset on the 1st. The user can edit the starting balance (the PRD only resets savings).
+- ~~The diary balance doesn't reset on the 1st.~~ Replaced during `5-build` by the team's decision: "money you have this month" is entered once per month (the new month's question is pre-filled from where last month's Diary ended), and the Diary balance counts only this month's entries. A "fix" link corrects typos.
+- **One balance** (team decision during `5-build`, replacing the earlier pre-fill options A/B): the morning balance is the Diary balance, frozen at lock-in. The bet covers lock-in to night check-in; spending before the bet is an accepted gap. Only income logged after the bet is added, so it's never counted twice. Settling adds any shortfall to the Diary as "Unlogged spending."
 
 **The useful unknown**
 - *Question raised:* "If I choose A, can I update to D (real accounts, many devices) after the hackathon?"
@@ -265,4 +273,4 @@ Script load order in `index.html`: storage → dates → rules → catchup → a
 
 **Still open (carried over from `prd.md > Open Questions`, can wait)**
 - The final project name ("Beat Yourself" is a working title).
-- Whether the night check-in should pre-fill with the Diary balance. Typing it in for now.
+- Whether the night check-in should pre-fill with the Diary balance. Typing it in for now: the typed number is the honest check, and the gap becomes "Unlogged spending."

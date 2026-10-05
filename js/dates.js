@@ -31,6 +31,11 @@ window.BY = window.BY || {};
     return keyOf(d);
   }
 
+  // "2026-01" → "2025-12"
+  function prevMonth(month) {
+    return addDays(month + '-01', -1).slice(0, 7);
+  }
+
   function isNightOpen(now) {
     return (now || new Date()).getHours() >= NIGHT_UNLOCK_HOUR;
   }
@@ -41,6 +46,7 @@ window.BY = window.BY || {};
     monthKey: monthKey,
     addDays: addDays,
     parseKey: parseKey,
+    prevMonth: prevMonth,
     isNightOpen: isNightOpen
   };
 })(window.BY);

@@ -12,7 +12,7 @@ window.BY = window.BY || {};
       theme: 'day',
       startDate: BY.dates.todayKey(),
       days: {},
-      diary: { startingBalance: 0, entries: [] },
+      diary: { startingBalances: {}, entries: [] },
       goal: { amount: 0, month: BY.dates.monthKey(), saved: 0, monthlyAchieved: false },
       achievements: [],
       demoNightUnlocked: null
@@ -31,6 +31,9 @@ window.BY = window.BY || {};
       Object.keys(fresh).forEach(function (k) {
         if (data[k] === undefined) data[k] = fresh[k];
       });
+      // Before slice 3 the diary had one startingBalance instead of one per month
+      if (!data.diary.startingBalances) data.diary.startingBalances = {};
+      delete data.diary.startingBalance;
       return data;
     } catch (e) {
       console.warn('Saved data could not be read, starting fresh.', e);

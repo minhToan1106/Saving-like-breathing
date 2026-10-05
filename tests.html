@@ -32,7 +32,7 @@
       }
 
       function dataWith(entries) {
-        return { diary: { startingBalance: 0, entries: entries } };
+        return { days: {}, diary: { startingBalances: {}, entries: entries } };
       }
 
       // ---- Verdict (prd.md > Night Check-in and Verdict) ----
@@ -118,6 +118,53 @@
       var acrossMonth = { startDate: '2026-09-29', days: {} };
       BY.catchup.run(acrossMonth, new Date(2026, 9, 2, 9, 0));
       check('Catch-up crosses a month boundary', Object.keys(acrossMonth.days).sort(), ['2026-09-29', '2026-09-30', '2026-10-01']);
+
+      // ---- One balance: the bet starts from the Diary balance (prd.md > Morning Bet) ----
+      var BET = 1000000; // a fake "bet locked in" time
+      var inc = dataWith([
+        { date: '2026-10-04', type: 'income', amount: 10000, at: BET - 5 },
+        { date: '2026-10-04', type: 'income', amount: 2000, at: BET + 5 },
+        { date: '2026-10-04', type: 'spending', amount: 500, at: BET + 6 }
+      ]);
+      check('Income logged before the bet is not counted twice', R.incomeOn(inc, '2026-10-04', BET), 2000);
+      check('Without a bet time, all of the day\'s income counts', R.incomeOn(inc, '2026-10-04'), 12000);
+
+      // Example from the team: Diary $100, $5 coffee before the bet, $5 lunch after
+      var ex = dataWith([
+        { date: '2026-10-04', type: 'spending', amount: 500, at: BET - 5 },
+        { date: '2026-10-04', type: 'spending', amount: 500, at: BET + 5 }
+      ]);
+      ex.diary.startingBalances['2026-10'] = 10000;
+      var exOut = R.settleDay(9500, R.incomeOn(ex, '2026-10-04', BET), 9000, 300);
+      check('Coffee before the bet → morning $95; lunch after → $5 spent', exOut.actualSpent, 500);
+      check('… Lose at a $3 limit', exOut.result, 'loss');
+
+      // ---- Unlogged spending at settle ----
+      check('Night lower than the Diary → unlogged spending for the difference',
+        R.unloggedSpending(9000, 8400), { type: 'spending', amount: 600, note: 'Unlogged spending' });
+      check('Night matches the Diary → nothing added', R.unloggedSpending(9000, 9000), null);
+      check('Night higher than the Diary → nothing added', R.unloggedSpending(9000, 9500), null);
+
+      // ---- New month suggestion ----
+      check('Month before January is December', D.prevMonth('2026-01'), '2025-12');
+      var nm = dataWith([
+        { date: '2026-09-10', type: 'spending', amount: 2000 },
+        { date: '2026-09-20', type: 'income', amount: 500 }
+      ]);
+      nm.diary.startingBalances['2026-09'] = 20000;
+      check('New month suggests where last month ended', R.monthStartSuggestion(nm, '2026-10'), 18500);
+      check('No last month → no suggestion', R.monthStartSuggestion(nm, '2026-09'), null);
+
+      // ---- Diary balance per month (prd.md > Diary) ----
+      var md = dataWith([
+        { date: '2026-09-30', type: 'spending', amount: 999 },
+        { date: '2026-10-01', type: 'spending', amount: 400 },
+        { date: '2026-10-02', type: 'income', amount: 10000 }
+      ]);
+      check('No starting money this month → asks (null)', R.monthBalance(md, '2026-10'), null);
+      md.diary.startingBalances['2026-10'] = 20000;
+      check("Balance = this month's start + income − spending", R.monthBalance(md, '2026-10'), 29600);
+      check("Last month's starting money doesn't answer this month", R.monthBalance({ diary: { startingBalances: { '2026-09': 5000 }, entries: [] } }, '2026-10'), null);
 
       // ---- Show results ----
       var list = document.getElementById('results');

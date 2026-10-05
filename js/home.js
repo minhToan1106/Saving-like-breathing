@@ -51,6 +51,26 @@ window.BY = window.BY || {};
     }).join('');
 
     var penalty = BY.rules.penaltyFor(data, today);
+    var month = BY.dates.monthKey();
+    // One balance: the morning balance is whatever the Diary says. If this month has no
+    // starting money yet (first use, new month), Home asks for it here instead.
+    var diaryBalance = BY.rules.monthBalance(data, month);
+    var suggestion = diaryBalance === null ? BY.rules.monthStartSuggestion(data, month) : null;
+    var balanceField = diaryBalance !== null
+      ? '<div class="field">' +
+          '<p class="field-label">Money you have</p>' +
+          '<p class="money-now" id="morning-balance-shown">' + money(diaryBalance) + '</p>' +
+          '<p class="hint">From your Diary. <button type="button" class="link-btn" id="fix-in-diary">Fix it in Diary</button></p>' +
+        '</div>'
+      : '<div class="field">' +
+          '<label for="morning-balance">Money you have this month</label>' +
+          '<input id="morning-balance" inputmode="decimal" autocomplete="off" placeholder="e.g. 200.00"' +
+            (suggestion !== null ? ' value="' + (Math.max(0, suggestion) / 100).toFixed(2) + '"' : '') + '>' +
+          '<p class="hint">' + (suggestion !== null
+            ? 'Where last month\'s Diary ended. Change it if needed.'
+            : 'This also starts your Diary for the month.') + '</p>' +
+          '<p class="field-error" id="morning-error"></p>' +
+        '</div>';
     var penaltyNotice = penalty
       ? '<div class="card sketch penalty-notice" id="penalty-notice">' +
           '<p class="eyebrow">Penalty</p>' +
@@ -71,19 +91,15 @@ window.BY = window.BY || {};
           '<input id="custom-stake" inputmode="decimal" autocomplete="off" placeholder="e.g. 4.50">' +
           '<p class="field-error" id="custom-error"></p>' +
         '</div>' +
-        '<div class="field">' +
-          '<label for="morning-balance">Money you have right now</label>' +
-          '<input id="morning-balance" inputmode="decimal" autocomplete="off" placeholder="e.g. 50.00">' +
-          '<p class="field-error" id="morning-error"></p>' +
-        '</div>' +
+        balanceField +
         '<p class="limit-preview" id="limit-preview" hidden></p>' +
         '<button type="button" class="btn primary" id="confirm-bet" disabled>Lock in the stakes</button>' +
-        '<p class="hint" id="bet-hint">Pick your stakes and enter your balance to lock in.</p>' +
+        '<p class="hint" id="bet-hint">' + (diaryBalance !== null ? 'Pick your stakes to lock in.' : 'Pick your stakes and enter your balance to lock in.') + '</p>' +
       '</div>';
 
     var customField = root.querySelector('#custom-field');
     var customInput = root.querySelector('#custom-stake');
-    var morningInput = root.querySelector('#morning-balance');
+    var morningInput = root.querySelector('#morning-balance'); // only when asking for this month's money
     var confirmBtn = root.querySelector('#confirm-bet');
 
     function chosenStake() {
@@ -94,11 +110,13 @@ window.BY = window.BY || {};
 
     function validate() {
       var stake = chosenStake();
-      var morning = BY.rules.parseMoney(morningInput.value);
+      var morning = morningInput ? BY.rules.parseMoney(morningInput.value) : diaryBalance;
       root.querySelector('#custom-error').textContent =
         ui.custom && customInput.value.trim() && stake === null ? 'Enter a limit above $0, like 4.50' : '';
-      root.querySelector('#morning-error').textContent =
-        morningInput.value.trim() && morning === null ? BALANCE_ERROR : '';
+      if (morningInput) {
+        root.querySelector('#morning-error').textContent =
+          morningInput.value.trim() && morning === null ? BALANCE_ERROR : '';
+      }
       var preview = root.querySelector('#limit-preview');
       preview.hidden = !(penalty && stake !== null);
       if (!preview.hidden) {
@@ -128,21 +146,27 @@ window.BY = window.BY || {};
     });
 
     customInput.addEventListener('input', validate);
-    morningInput.addEventListener('input', validate);
+    if (morningInput) morningInput.addEventListener('input', validate);
+    var fixLink = root.querySelector('#fix-in-diary');
+    if (fixLink) fixLink.addEventListener('click', function () { BY.app.showScreen('diary'); });
 
     confirmBtn.addEventListener('click', function () {
       var bet = validate();
       if (!bet) return;
+      if (morningInput) data.diary.startingBalances[month] = bet.morning;
       data.days[today] = {
         stake: bet.stake,
         penalty: penalty,
         limit: BY.rules.limitFor(bet.stake, penalty),
-        morningBalance: bet.morning,
+        morningBalance: bet.morning,   // the Diary balance at the moment of the bet
+        betAt: Date.now(),
         nightBalance: null,
         income: 0,
         actualSpent: null,
         result: null,
         saved: 0,
+        unlogged: 0,
+        settledAt: null,
         missed: false,
         demo: false
       };
@@ -185,6 +209,7 @@ window.BY = window.BY || {};
         '<p class="big-line">Did you beat yourself?</p>' +
         '<p class="muted">Limit: ' + money(day.limit) + ' · Morning balance: ' + money(day.morningBalance) + '</p>' +
         penaltyLine(day) +
+        '<p class="muted">Income logged in the Diary since your bet: ' + money(BY.rules.incomeOn(data, BY.dates.todayKey(), day.betAt)) + '</p>' +
         '<div class="field">' +
           '<label for="night-balance">Money you have now</label>' +
           '<input id="night-balance" inputmode="decimal" autocomplete="off" placeholder="e.g. 48.00">' +
@@ -206,13 +231,27 @@ window.BY = window.BY || {};
       var night = BY.rules.parseMoney(input.value);
       if (night === null) return;
       var today = BY.dates.todayKey();
-      var income = BY.rules.incomeOn(data, today);
+      var income = BY.rules.incomeOn(data, today, day.betAt);
       var outcome = BY.rules.settleDay(day.morningBalance, income, night, day.limit);
       day.nightBalance = night;
       day.income = income;
       day.actualSpent = outcome.actualSpent;
       day.result = outcome.result;
       day.saved = outcome.saved;
+      day.settledAt = Date.now();
+      // Keep the Diary matching real money: anything missing was spent without being logged
+      var unlogged = BY.rules.unloggedSpending(BY.rules.monthBalance(data, BY.dates.monthKey()), night);
+      if (unlogged) {
+        data.diary.entries.push({
+          id: 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          date: today,
+          type: unlogged.type,
+          amount: unlogged.amount,
+          note: unlogged.note,
+          at: day.settledAt
+        });
+        day.unlogged = unlogged.amount;
+      }
       render(data);
       BY.rules.achievementsFor(data, today).forEach(function (kind) {
         BY.achievements.show(kind, data);
@@ -231,6 +270,9 @@ window.BY = window.BY || {};
         '<p>You spent <strong>' + money(day.actualSpent) + '</strong> against a <strong>' + money(day.limit) + '</strong> limit.</p>' +
         '<p class="muted math">' + money(day.morningBalance) + ' morning + ' + money(day.income) + ' income − ' +
           money(day.nightBalance) + ' tonight = ' + money(day.actualSpent) + ' spent</p>' +
+        (day.unlogged
+          ? '<p class="muted" id="unlogged-note">' + money(day.unlogged) + ' you didn\'t log was added to your Diary as unlogged spending.</p>'
+          : '') +
         (win
           ? '<p class="muted">Protect your streak. A new bet opens at midnight.</p>'
           : '<p class="muted">Streak reset to 0. Tomorrow, ' + money(BY.rules.PENALTY) +

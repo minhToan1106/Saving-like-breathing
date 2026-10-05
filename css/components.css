@@ -320,6 +320,124 @@ input:focus-visible {
   to   { transform: scale(0.9) rotate(-3deg) translateY(-20px); opacity: 0; }
 }
 
+/* ---------- Screen headings ---------- */
+.screen-head {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0 8px;
+}
+
+.screen-title {
+  margin: 0;
+  font-size: clamp(36px, 5vw, 52px);
+  transform: rotate(-1deg);
+}
+
+/* ---------- Diary ---------- */
+.diary {
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+}
+
+.balance-card {
+  text-align: center;
+}
+
+.balance-amount {
+  font-size: 54px;
+  line-height: 1;
+  margin: 4px 0 18px !important;
+}
+
+.balance-amount.is-negative {
+  color: var(--loss);
+}
+
+/* Home's read-only "Money you have" (from the Diary) */
+.field-label {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.money-now {
+  font-family: var(--font-head);
+  font-size: 1.8em;
+  margin: 0;
+}
+
+/* Small text-style button, e.g. "fix starting money" */
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.9em;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link-btn:hover {
+  color: var(--accent);
+}
+
+.inline-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  text-align: left;
+}
+
+.inline-form .field {
+  margin: 0;
+}
+
+.inline-form input {
+  max-width: 140px;
+}
+
+.entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: min(100%, 560px);
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 70px 1fr auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 10px 6px;
+  border-bottom: 1.5px dashed var(--ink-soft);
+}
+
+.entry-date {
+  color: var(--ink-soft);
+  font-size: 0.9em;
+}
+
+.entry-note {
+  overflow-wrap: anywhere;
+}
+
+.entry-amount {
+  font-size: 1.1em;
+}
+
+.entry-spending .entry-amount { color: var(--loss); }
+.entry-income .entry-amount { color: var(--win); }
+
+.empty-note {
+  max-width: 420px;
+  text-align: center;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
 /* ---------- Notices ---------- */
 .notice {
   margin-right: auto;

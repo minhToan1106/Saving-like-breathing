@@ -21,10 +21,15 @@ window.BY = window.BY || {};
     return Math.max(0, stakeCents - penaltyCents);
   }
 
-  // Sum of that day's Diary income entries.
-  function incomeOn(data, dayKey) {
+  // Sum of that day's Diary income entries. With sinceTime (when the bet was locked in),
+  // only income logged after the bet counts: income logged before it is already inside
+  // the morning balance, so adding it again would count it twice.
+  function incomeOn(data, dayKey, sinceTime) {
     return data.diary.entries
-      .filter(function (e) { return e.type === 'income' && e.date === dayKey; })
+      .filter(function (e) {
+        if (e.type !== 'income' || e.date !== dayKey) return false;
+        return !sinceTime || !e.at || e.at > sinceTime;
+      })
       .reduce(function (sum, e) { return sum + e.amount; }, 0);
   }
 
@@ -64,6 +69,30 @@ window.BY = window.BY || {};
     return streak;
   }
 
+  // The Diary balance for one month: that month's starting money + its income − its spending.
+  // null if the starting money for that month hasn't been entered yet.
+  function monthBalance(data, month) {
+    var start = data.diary.startingBalances[month];
+    if (typeof start !== 'number') return null;
+    return data.diary.entries
+      .filter(function (e) { return e.date.slice(0, 7) === month; })
+      .reduce(function (sum, e) {
+        return sum + (e.type === 'income' ? e.amount : -e.amount);
+      }, start);
+  }
+
+  // Suggested starting money for a new month: where last month's Diary ended, or null.
+  function monthStartSuggestion(data, month) {
+    return monthBalance(data, BY.dates.prevMonth(month));
+  }
+
+  // At settle: if the night balance is lower than the Diary says, the difference was
+  // spent without being logged. Returns the Diary entry to add, or null.
+  function unloggedSpending(diaryBalance, night) {
+    if (diaryBalance === null || night >= diaryBalance) return null;
+    return { type: 'spending', amount: diaryBalance - night, note: 'Unlogged spending' };
+  }
+
   // Which pop-ups to show after a day is settled.
   function achievementsFor(data, dayKey) {
     var kinds = [];
@@ -80,6 +109,9 @@ window.BY = window.BY || {};
     settleDay: settleDay,
     penaltyFor: penaltyFor,
     currentStreak: currentStreak,
+    monthBalance: monthBalance,
+    monthStartSuggestion: monthStartSuggestion,
+    unloggedSpending: unloggedSpending,
     achievementsFor: achievementsFor
   };
 })(window.BY);
