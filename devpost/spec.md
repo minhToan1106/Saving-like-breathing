@@ -63,6 +63,7 @@ Traces `prd.md > The Core Journey`.
   5. Flip the day/night toggle.
 - **README:** `README.md` repeats how to run, reset, and record the demo.
 - **Submission:** a short demo video plus a public GitHub repository. Both are required.
+  - Repository: https://github.com/minhToan1106/Saving-like-breathing
 - **Optional deployment (decide in `6-ship`):** GitHub Pages can serve these same files at a free public link, with no code changes. Each visitor's device keeps its own data.
 
 ## Look and Feel
