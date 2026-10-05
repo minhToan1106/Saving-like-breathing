@@ -130,7 +130,7 @@ Top: if this month has no starting money yet (first use, or the first open in a 
 PRD ref: `prd.md > Diary`.
 
 ### Streak Viewer (`js/streaks.js`)
-The current streak number, plus a grid of day squares (rows of 7, covering the start of last month through today, so the 30-day demo fits). Each square is green for a win, red for a loss, gray for no data or before you started, and outlined if it's today and unsettled. It reads from the day records and from `rules.currentStreak()`, so it always matches Home.
+The current streak number, plus a full-year contribution-style grid (January 1 to December 31 of the current year): split into 12 month blocks with a gap between them (team request, for a cleaner look); inside each block one column per week and one row per weekday (Sunday first), the month name on top, and Mon/Wed/Fri at the side. Each square is green for a win, red for a loss, gray for no data or before you started, faint for days still to come, and today is outlined. On narrow screens the grid scrolls sideways inside its card, starting at today. It reads from the day records and from `rules.currentStreak()`, so it always matches Home.
 PRD ref: `prd.md > Streak Viewer`.
 
 ### Achievement Pop-ups (`js/achievements.js`)
@@ -143,7 +143,7 @@ PRD ref: `prd.md > Day/Night Toggle`.
 
 ### Demo Buttons (in `js/home.js`)
 - **Skip to tonight:** sets `data.demoNightUnlocked = todayKey()`. Night opens immediately for today only.
-- **Skip to 30 days of success:** **sample data, labeled `demo: true`.** Writes 30 winning day records ending yesterday (stake $10, limit $10, actual spent from a fixed pattern of $3–$7, so about $150 saved in total). Demo days carry no balances (`null`) and don't touch the Diary. It replaces any records on those dates, moves the start date back if needed, adds the 30 saved amounts to this month's savings, then shows `grand30`, and `monthly` if the goal is reached. Today stays as it was.
+- **Skip to 30 days of success:** **sample data, labeled `demo: true`.** Writes 30 winning day records ending yesterday (stake $10, limit $10, actual spent from a fixed pattern of $3–$7, saved through the same `settleDay` savings cap as real days, so about $150 saved when the suggested bet is $10 or more). Built by `rules.demoDays(today, cap)`. Demo days carry no balances (`null`) and don't touch the Diary. It replaces any records on those dates, moves the start date back if needed, adds the 30 saved amounts to this month's savings, then shows `grand30`, and `monthly` if the goal is reached. Today stays as it was.
 PRD ref: `prd.md > Demo Buttons`.
 
 ### Rules Check Page (`tests.html`)

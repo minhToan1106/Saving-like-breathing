@@ -109,7 +109,7 @@ Develops `scope.md > The Unique Kernel`.
 - [ ] New entries appear in the visible list.
 
 ### Streak Viewer
-- A grid of days, like an activity graph: **green = win, red = loss, gray = no data** (days before the user started).
+- A grid of days, like an activity graph: **green = win, red = loss, gray = no data** (days before the user started). It covers the **whole current year, January to December** (one column per week, month names on top), so the user sees the full view; days still to come are faint.
 - Shows the **current streak** number.
 - [ ] After a win, today's square turns green. After a loss, it turns red.
 - [ ] The current streak number matches the Home result.

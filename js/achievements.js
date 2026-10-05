@@ -10,6 +10,9 @@ window.BY = window.BY || {};
     win: function (info) {
       return { title: 'Yesterday\'s you: beaten.', sub: 'Streak: ' + info.streak + (info.streak === 1 ? ' day' : ' days') };
     },
+    grand30: function () {
+      return { title: '30 Days Unbeaten', sub: 'A whole month of beating yourself.', big: true };
+    },
     monthly: function (info) {
       return { title: 'Goal Reached', sub: BY.rules.formatMoney(info.data.goal.saved) + ' saved this month', big: true };
     }

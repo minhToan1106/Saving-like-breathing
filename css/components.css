@@ -360,6 +360,148 @@ input:focus-visible {
   border-style: dashed;
 }
 
+/* ---------- Demo corner ---------- */
+.demo-corner {
+  margin: 26px auto 0;
+  max-width: 520px;
+  padding: 12px 18px;
+  border: 2px dashed var(--ink-soft);
+  border-radius: var(--rough-b);
+  text-align: center;
+  opacity: 0.85;
+}
+
+/* ---------- Streaks ---------- */
+.streaks {
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+}
+
+.streak-card {
+  text-align: center;
+}
+
+.streak-number {
+  font-family: var(--font-head);
+  font-size: 72px;
+  line-height: 1;
+  margin: 4px 0 !important;
+  color: var(--accent);
+}
+
+.grid-card {
+  width: auto;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.year-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 4px 2px 8px;
+}
+
+/* Contribution-graph layout: weekday labels, then 12 month blocks with gaps between them */
+.year {
+  display: flex;
+  gap: 6px;
+  width: max-content;
+  margin: 0 auto;
+}
+
+.months {
+  display: flex;
+  gap: 9px;
+}
+
+.month {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+
+.month-label {
+  font-size: 0.8em;
+  line-height: 18px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.weekday-labels {
+  list-style: none;
+  padding: 0;
+  margin: 22px 0 0;
+  display: grid;
+  grid-template-rows: repeat(7, 12px);
+  row-gap: 2px;
+  font-size: 0.68em;
+  line-height: 12px;
+  color: var(--ink-soft);
+}
+
+.grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(7, 12px);
+  grid-auto-columns: 12px;
+  gap: 2px;
+}
+
+.sq {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--ink);
+  border-radius: 4px 2px 4px 3px / 3px 4px 2px 4px;
+  box-sizing: border-box;
+}
+
+.sq-win { background: var(--win); }
+.sq-loss { background: var(--loss); }
+.sq-none { background: var(--none); opacity: 0.6; }
+.sq-future { opacity: 0.22; }
+.sq-blank { visibility: hidden; }
+
+.sq-today {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  opacity: 1;
+}
+
+.legend {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend .sq {
+  width: 16px;
+  height: 16px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 /* ---------- Monthly goal ---------- */
 .goal-card {
   margin-top: 22px;

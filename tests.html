@@ -193,6 +193,21 @@
       check('Win spending more than the suggestion → $0 saved, never negative', R.settleDay(10000, 0, 8500, 2000, 1000).saved, 0);
       check('Old days without a suggestion → no cap', R.settleDay(5000, 0, 4800, 300).saved, 100);
 
+      // ---- 30-day demo and grand achievement (prd.md > Demo Buttons) ----
+      var dd = R.demoDays('2026-10-05', 1000);
+      var ddKeys = Object.keys(dd.days).sort();
+      check('Demo writes 30 days', ddKeys.length, 30);
+      check('… ending yesterday', [ddKeys[0], ddKeys[29]], ['2026-09-05', '2026-10-04']);
+      check('… all wins, marked demo', ddKeys.every(function (k) { return dd.days[k].result === 'win' && dd.days[k].demo; }), true);
+      check('… saving about $150', dd.saved >= 14000 && dd.saved <= 16000, true);
+      check('A 30-day streak from the demo', R.currentStreak({ days: dd.days }), 30);
+      check('A low suggested bet caps demo savings too', R.demoDays('2026-10-05', 167).saved, 0);
+      var g29 = R.demoDays('2026-10-05', 1000).days;
+      delete g29['2026-09-05'];
+      g29['2026-10-05'] = day('win');
+      check('The 30th win in a row earns the grand achievement', R.achievementsFor({ days: g29 }, '2026-10-05'), ['win', 'grand30']);
+      check('The 29th does not', R.achievementsFor({ days: g29 }, '2026-10-04'), ['win']);
+
       // ---- Show results ----
       var list = document.getElementById('results');
       var failed = 0;

@@ -63,19 +63,24 @@ window.BY = window.BY || {};
     return prev && prev.result === 'loss' ? PENALTY : 0;
   }
 
-  // Consecutive wins, counting back from the latest settled day.
-  function currentStreak(data) {
-    var settled = Object.keys(data.days)
-      .filter(function (k) { return data.days[k].result; })
-      .sort();
-    if (!settled.length) return 0;
-    var key = settled[settled.length - 1];
+  // Consecutive wins ending on dayKey, counting backwards.
+  function streakEndingOn(data, dayKey) {
+    var key = dayKey;
     var streak = 0;
     while (data.days[key] && data.days[key].result === 'win') {
       streak++;
       key = BY.dates.addDays(key, -1);
     }
     return streak;
+  }
+
+  // Consecutive wins, counting back from the latest settled day.
+  function currentStreak(data) {
+    var settled = Object.keys(data.days)
+      .filter(function (k) { return data.days[k].result; })
+      .sort();
+    if (!settled.length) return 0;
+    return streakEndingOn(data, settled[settled.length - 1]);
   }
 
   // The Diary balance for one month: that month's starting money + its income − its spending.
@@ -102,6 +107,32 @@ window.BY = window.BY || {};
     return { type: 'spending', amount: diaryBalance - night, note: 'Unlogged spending' };
   }
 
+  var GRAND_STREAK = 30;
+
+  // "Skip to 30 days of success": 30 winning sample days ending the day before dayKey.
+  // Stake and limit $10, spending from a fixed $3–$7 pattern, saved through the same
+  // settleDay rule (and savings cap) as a real day. Returns { days, saved }.
+  var DEMO_SPENT = [300, 500, 700, 400, 600, 300, 500];
+
+  function demoDays(dayKey, savingsCap) {
+    var days = {};
+    var saved = 0;
+    for (var i = GRAND_STREAK; i >= 1; i--) {
+      var key = BY.dates.addDays(dayKey, -i);
+      var spent = DEMO_SPENT[i % DEMO_SPENT.length];
+      var outcome = settleDay(spent, 0, 0, 1000, savingsCap);
+      days[key] = {
+        stake: 1000, penalty: 0, limit: 1000,
+        morningBalance: null, nightBalance: null, income: 0,
+        actualSpent: outcome.actualSpent, result: outcome.result, saved: outcome.saved,
+        suggested: typeof savingsCap === 'number' ? savingsCap : null,
+        missed: false, demo: true
+      };
+      saved += outcome.saved;
+    }
+    return { days: days, saved: saved };
+  }
+
   // True the first time this month's savings reach a goal that has been set.
   function goalJustReached(goal) {
     return !!goal && goal.amount > 0 && goal.saved >= goal.amount && !goal.monthlyAchieved;
@@ -110,7 +141,10 @@ window.BY = window.BY || {};
   // Which pop-ups to show after a day is settled (call after the day's savings are added).
   function achievementsFor(data, dayKey) {
     var kinds = [];
-    if (data.days[dayKey] && data.days[dayKey].result === 'win') kinds.push('win');
+    if (data.days[dayKey] && data.days[dayKey].result === 'win') {
+      kinds.push('win');
+      if (streakEndingOn(data, dayKey) === GRAND_STREAK) kinds.push('grand30');
+    }
     if (goalJustReached(data.goal)) kinds.push('monthly');
     return kinds;
   }
@@ -128,6 +162,8 @@ window.BY = window.BY || {};
     monthBalance: monthBalance,
     monthStartSuggestion: monthStartSuggestion,
     unloggedSpending: unloggedSpending,
+    GRAND_STREAK: GRAND_STREAK,
+    demoDays: demoDays,
     goalJustReached: goalJustReached,
     achievementsFor: achievementsFor
   };

@@ -5,7 +5,8 @@ window.BY = window.BY || {};
 (function (BY) {
   var SCREENS = {
     home: function (data) { BY.home.render(data); },
-    diary: function (data) { BY.diary.render(data); }
+    diary: function (data) { BY.diary.render(data); },
+    streaks: function (data) { BY.streaks.render(data); }
   };
   var lastView = null;
 

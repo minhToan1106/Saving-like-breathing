@@ -31,7 +31,13 @@ window.BY = window.BY || {};
       '<p class="streak-badge sketch">Streak: <strong id="home-streak">' + streak + '</strong>' +
         (streak === 1 ? ' day' : ' days') + '</p>' +
       '<div id="home-card" class="home-card"></div>' +
-      '<div id="home-goal" class="home-card"></div>';
+      '<div id="home-goal" class="home-card"></div>' +
+      '<div class="demo-corner sketch">' +
+        '<p class="eyebrow">Demo</p>' +
+        '<button type="button" class="btn" id="skip-30">Skip to 30 days of success <span class="tag">demo</span></button>' +
+        '<p class="hint">Fills the last 30 days with sample wins so the big achievements can be shown.</p>' +
+      '</div>';
+    play.querySelector('#skip-30').addEventListener('click', function () { skipThirtyDays(data); });
     var root = play.querySelector('#home-card');
     renderGoal(play.querySelector('#home-goal'), data, day);
 
@@ -295,6 +301,28 @@ window.BY = window.BY || {};
       });
       save(data);
     });
+  }
+
+  // ---------- Demo: 30 days of success ----------
+  function skipThirtyDays(data) {
+    var today = BY.dates.todayKey();
+    var cap = BY.rules.suggestedBet(data.diary.startingBalances[BY.dates.monthKey()]);
+    var demo = BY.rules.demoDays(today, cap === null ? undefined : cap);
+    Object.keys(demo.days).forEach(function (k) { data.days[k] = demo.days[k]; });
+    var firstDemo = BY.dates.addDays(today, -BY.rules.GRAND_STREAK);
+    if (data.startDate > firstDemo) data.startDate = firstDemo;
+    data.goal.saved += demo.saved;
+
+    var kinds = [];
+    if (BY.rules.currentStreak(data) >= BY.rules.GRAND_STREAK) kinds.push('grand30');
+    if (BY.rules.goalJustReached(data.goal)) {
+      data.goal.monthlyAchieved = true;
+      kinds.push('monthly');
+    }
+    save(data);
+    render(data);
+    kinds.forEach(function (kind) { BY.achievements.show(kind, data); });
+    save(data);
   }
 
   // ---------- Monthly goal (always below the bet) ----------
