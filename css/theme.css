@@ -1,46 +1,79 @@
-/* Fonts, colors, paper texture and wobbly hand-drawn edges.
-   Every color is a variable, so the day/night toggle can swap the whole look. */
+/* Fonts, colors, crumpled paper and scratchy ink edges.
+   Every color is a variable, so the sun/moon toggle can swap the whole look.
+   Orange is kept for three things only: lit windows, key buttons and the streak number. */
 
 :root,
 [data-theme="day"] {
-  --paper: #e9dcc0;
-  --paper-deep: #d6c29c;
-  --card: #f3e8cf;
-  --ink: #2a1f16;
-  --ink-soft: #5e4a35;
-  --accent: #8b3a1e;
-  --on-ink: #f3e8cf;
-  --shade-1: rgba(70, 45, 20, 0.22);
-  --shade-2: rgba(70, 45, 20, 0.12);
-  --win: #5f7d45;
-  --loss: #9e3a2c;
-  --none: #b3a68f;
-  --grain-opacity: 0.55;
+  --paper: #e4dac1;
+  --card: #eee5cd;
+  --ink: #17130f;
+  --ink-soft: #4d4436;
+  --on-ink: #eee5cd;
+  --line: #17130f;
+  --sky: #aeac93;
+  --fog: #c8c3a7;
+  --soot: #3f3226;
+  --soot-far: #7c735f;
+  --pine: #2c3a2b;
+  --hatch: rgba(23, 19, 15, 0.55);
+  --sun: rgba(239, 233, 214, 0.7);
+  --moon: #d8d2bd;
+  --crater: #a7a08a;
+  --window: #3f3226;
+  --crow-eye: #d8d2bd;
+  --cloud: #ece4cc;
+  --soil: #5b4a37;
+  --root: #1d1610;
+  --stone: #8a7e66;
+  --accent: #d9772b;
+  --accent-ink: #a3501a;
+  --win: #5e6b3a;
+  --loss: #8a3322;
+  --none: #b0a68e;
+  --shade: rgba(23, 19, 15, 0.22);
+  --crumple-opacity: 1;
 }
 
-/* Night: near-black paper, parchment ink, ember accent */
+/* Night: ink navy and near-black masses, cream ink, lit windows */
 [data-theme="night"] {
-  --paper: #16120e;
-  --paper-deep: #0e0b08;
-  --card: #231c15;
-  --ink: #e6d8bd;
-  --ink-soft: #b5a283;
-  --accent: #d9824f;
-  --on-ink: #16120e;
-  --shade-1: rgba(0, 0, 0, 0.5);
-  --shade-2: rgba(0, 0, 0, 0.3);
-  --win: #7f9e62;
-  --loss: #c4594a;
-  --none: #5a5044;
-  --grain-opacity: 0.35;
+  --paper: #12151c;
+  --card: #1c202a;
+  --ink: #e2d8bf;
+  --ink-soft: #a1977f;
+  --on-ink: #12151c;
+  --line: #07080b;
+  --sky: #1b2233;
+  --fog: #262d40;
+  --soot: #0c0e14;
+  --soot-far: #161b27;
+  --pine: #0a110e;
+  --hatch: rgba(0, 0, 0, 0.6);
+  --sun: rgba(239, 233, 214, 0.7);
+  --moon: #d8d2bd;
+  --crater: #a7a08a;
+  --window: #e8873a;
+  --crow-eye: #d8d2bd;
+  --cloud: #283044;
+  --soil: #0e1016;
+  --root: #2b3142;
+  --stone: #1c212d;
+  --accent: #e8873a;
+  --accent-ink: #f0a04b;
+  --win: #87935a;
+  --loss: #b7563d;
+  --none: #3b3f4a;
+  --shade: rgba(0, 0, 0, 0.5);
+  --crumple-opacity: 0.45;
 }
 
 :root {
   --font-head: "IM Fell English", Georgia, serif;
   --font-body: "Patrick Hand", "Comic Sans MS", cursive;
-  /* Irregular corners so no two match */
-  --rough-a: 255px 18px 225px 16px / 16px 225px 18px 255px;
-  --rough-b: 18px 225px 16px 255px / 225px 16px 255px 18px;
+  /* Small, uneven corners: sharp, never round */
+  --rough-a: 3px 7px 2px 6px / 6px 2px 7px 3px;
+  --rough-b: 6px 2px 5px 3px / 2px 6px 3px 5px;
+  /* Diagonal ink hatching, for shadows and shaded fills */
+  --hatching: repeating-linear-gradient(135deg, var(--hatch) 0 1px, transparent 1px 5px);
 }
 
 html,
@@ -54,25 +87,19 @@ body {
   line-height: 1.4;
 }
 
-/* Paper grain plus darker, pencil-shaded edges */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: var(--grain-opacity);
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .22 0 0 0 0 .14 0 0 0 0 .06 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
+/* Crumpled paper over the whole page: ridged noise lit from the top left gives creases,
+   with a fine grain on top. Static; it never moves. */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 0;
-  box-shadow: inset 0 0 120px 30px var(--shade-1), inset 0 0 40px 6px var(--shade-2);
+  z-index: 5;
+  opacity: var(--crumple-opacity);
+  mix-blend-mode: soft-light;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .08 0 0 0 0 .05 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='700'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='turbulence' baseFrequency='.012' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeDiffuseLighting surfaceScale='4' lighting-color='%23fff'%3E%3CfeDistantLight azimuth='225' elevation='50'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E");
 }
 
 h1, h2, h3,
@@ -85,24 +112,30 @@ h1, h2, h3,
   position: absolute;
 }
 
-/* A sketched box: the border and fill sit on a wobbled layer behind the content,
-   so the edges look hand-drawn but the text stays crisp. */
+/* A sketched box: the border and fill sit on a scratchy layer behind the content,
+   with a hatched shadow beneath, so the edges look inked but the text stays crisp. */
 .sketch {
   position: relative;
   isolation: isolate;
 }
 
-.sketch::before {
+.sketch::before,
+.sketch::after {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: -1;
-  background: var(--card);
-  border: 2px solid var(--ink);
   border-radius: var(--rough-a);
   filter: url(#wobble);
-  box-shadow:
-    3px 4px 0 -1px var(--shade-1),
-    inset 0 0 18px var(--shade-2),
-    inset -6px -8px 0 -4px var(--shade-2);
+}
+
+.sketch::before {
+  z-index: -1;
+  background: var(--card);
+  border: 2.5px solid var(--ink);
+}
+
+.sketch::after {
+  z-index: -2;
+  transform: translate(6px, 7px);
+  background: var(--hatching);
 }

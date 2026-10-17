@@ -1,4 +1,6 @@
-/* Sidebar on the left, the main area on the right, one screen visible at a time. */
+/* Sidebar on the left, the main area on the right, one screen visible at a time.
+   Behind the main area runs one continuous scene: sky, then the edge trees and town,
+   then ground and soil that stretch as far as the page goes. */
 
 .shell {
   position: relative;
@@ -10,7 +12,8 @@
 
 .sidebar {
   padding: 28px 18px;
-  border-right: 2px solid var(--ink);
+  background: var(--card);
+  border-right: 3px solid var(--ink);
   filter: url(#wobble);
 }
 
@@ -18,7 +21,7 @@
   margin: 0 0 28px;
   font-size: 30px;
   line-height: 1.05;
-  color: var(--accent);
+  color: var(--ink);
 }
 
 .nav-list {
@@ -30,22 +33,111 @@
 }
 
 .main {
+  /* Where the ground line sits, and how wide the edge trees/town panels are */
+  --ground-y: 560px;
+  --edge-w: clamp(100px, 24vw, 360px);
+  position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-.topbar {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  gap: 16px;
-  padding: 16px 24px 0;
-  min-height: 44px;
+/* ---------- The scene ---------- */
+.scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(var(--sky), var(--fog) var(--ground-y));
+}
+
+.scene-sky {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 320px;
+}
+
+.scene-sky svg,
+.scene-earth svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Ground and soil: from the ground line to the very bottom of the page */
+.scene-earth {
+  position: absolute;
+  top: calc(var(--ground-y) - 14px);
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* The edge panels' ground line (y=380 of 540) lands exactly on --ground-y; roots hang below it */
+.scene-edge {
+  position: absolute;
+  top: calc(var(--ground-y) - var(--edge-w) * 380 / 360);
+  width: var(--edge-w);
+  height: calc(var(--edge-w) * 1.5);
+}
+
+.scene-left { left: 0; }
+.scene-right { right: 0; }
+
+/* Content sits above the scene; empty space lets clicks through to it (the crow) */
+.band,
+.screen {
+  position: relative;
+  z-index: 1;
+}
+
+.band {
+  height: 168px;
+  pointer-events: none;
+}
+
+.band .theme-slot,
+.band .notice {
+  pointer-events: auto;
 }
 
 .screen {
-  flex: 1;
+  pointer-events: none;
+}
+
+.screen :is(.card, .sketch, .entries, .empty-note, .screen-head) {
+  pointer-events: auto;
+}
+
+.band .hook {
+  position: absolute;
+  left: 50%;
+  top: 16px;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 150px);
+  pointer-events: none;
+}
+
+.band .theme-slot {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+}
+
+.band .notice {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  z-index: 2;
+  max-width: 40%;
+}
+
+.screen {
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   padding: 0 24px 40px;
@@ -55,19 +147,11 @@
   display: none;
 }
 
-/* Home: the hook fills the top half, the bet sits in the bottom half */
-.home-top {
-  min-height: 34vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
 .home-play {
   display: grid;
   justify-items: center;
-  gap: 22px;
+  gap: 18px;
+  padding-top: 18px;
 }
 
 @media (max-width: 720px) {
@@ -83,7 +167,7 @@
     gap: 16px;
     padding: 12px 16px;
     border-right: 0;
-    border-bottom: 2px solid var(--ink);
+    border-bottom: 3px solid var(--ink);
   }
 
   .brand {
@@ -95,13 +179,40 @@
     grid-auto-flow: column;
   }
 
-  .topbar,
+  .main {
+    --ground-y: 440px;
+    --edge-w: clamp(96px, 26vw, 360px);
+  }
+
+  .scene-sky {
+    height: 240px;
+  }
+
+  .band {
+    height: 100px;
+  }
+
+  .band .hook {
+    top: 10px;
+    max-width: calc(100% - 100px);
+  }
+
+  .band .theme-slot {
+    top: 8px;
+    right: 12px;
+  }
+
+  .band .notice {
+    max-width: calc(100% - 32px);
+  }
+
   .screen {
     padding-left: 16px;
     padding-right: 16px;
   }
 
-  .home-top {
-    min-height: 24vh;
+  .home-play {
+    gap: 12px;
+    padding-top: 12px;
   }
 }

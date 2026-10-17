@@ -1,20 +1,153 @@
-/* Buttons, cards, inputs, the hook animation and the verdict. */
+/* Buttons, cards, inputs, the inked band, the sun/moon and the verdict.
+   Motion is kept to three moments: the win stamp, the goal bar filling, and the crow's hop. */
 
-/* ---------- Hook ---------- */
+/* ---------- Hook (in the band) ---------- */
 .hook {
   margin: 0;
   text-align: center;
-  font-size: clamp(34px, 6vw, 64px);
+  font-size: clamp(22px, 3.4vw, 42px);
   line-height: 1.08;
   color: var(--ink);
-  text-shadow: 2px 2px 0 var(--shade-2);
-  animation: hook-drop 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+  text-shadow: 0 0 6px var(--fog), 0 0 14px var(--fog), 0 0 2px var(--fog);
 }
 
-@keyframes hook-drop {
-  from { transform: translateY(-140%) rotate(-2deg); opacity: 0; }
-  to   { transform: translateY(0) rotate(0); opacity: 1; }
+/* ---------- Scene art ---------- */
+.hatch-line { stroke: var(--hatch); stroke-width: 1.3; }
+
+.scene-ink {
+  stroke: var(--line);
+  stroke-width: 2.4;
+  stroke-linejoin: miter;
+  stroke-linecap: square;
 }
+
+.scene-ink .pine { fill: var(--pine); }
+.scene-ink .soot { fill: var(--soot); }
+.scene-ink .shade { fill: url(#hatch); stroke: none; }
+.scene-ink .window { fill: var(--window); stroke-width: 1.4; }
+.scene-ink .snag { fill: none; stroke: var(--soot); stroke-width: 4; }
+.scene-ink .root { fill: none; stroke: var(--root); stroke-width: 2.4; }
+
+/* Crumpled-paper clouds */
+.clouds { stroke: var(--line); stroke-width: 2; stroke-linejoin: miter; }
+.cloud { fill: var(--cloud); }
+.crease { fill: none; stroke-width: 1.2; opacity: 0.6; }
+
+/* Ground and soil tiles */
+.soil-base { fill: var(--soil); }
+.ground-fill { fill: var(--soil); }
+.ground-edge { fill: none; stroke: var(--line); stroke-width: 3; stroke-linejoin: miter; }
+.tuft { fill: none; stroke: var(--line); stroke-width: 2; }
+.soil-root { fill: none; stroke: var(--root); stroke-width: 1.8; }
+.stone { fill: var(--stone); stroke: var(--line); stroke-width: 1.6; stroke-linejoin: miter; }
+.speck { stroke: var(--root); stroke-width: 2; stroke-linecap: square; }
+
+/* Parallax: over the first 600px of scrolling, the clouds drift down 150px,
+   so they seem to move a little slower than the trees. Plain CSS; skipped where unsupported. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scene-sky {
+      animation: cloud-drift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 600px;
+    }
+  }
+}
+
+@keyframes cloud-drift {
+  to { transform: translateY(150px); }
+}
+
+.stars { fill: var(--moon); }
+[data-theme="day"] .stars { display: none; }
+
+/* ---------- The crow on the tower: click and it hops once ---------- */
+.crow {
+  cursor: pointer;
+  outline: none;
+  pointer-events: auto;
+}
+
+.crow-body {
+  fill: var(--soot);
+  stroke: var(--line);
+  stroke-width: 1.6;
+  stroke-linejoin: miter;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+[data-theme="night"] .crow-body { fill: #07080b; }
+.crow-legs { fill: none; }
+.crow-eye { fill: var(--line); stroke: none; }
+[data-theme="night"] .crow-eye { fill: var(--crow-eye); }
+
+.crow-wing {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+}
+
+.crow:focus-visible .crow-body {
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+
+.crow.is-hopping .crow-body {
+  animation: crow-hop 0.9s ease-out both;
+}
+
+.crow.is-hopping .crow-wing {
+  animation: crow-wing 0.9s ease-out both;
+}
+
+@keyframes crow-hop {
+  0%, 100% { transform: translateY(0); }
+  30%      { transform: translateY(-14px) rotate(-6deg); }
+  55%      { transform: translateY(0) rotate(0); }
+  70%      { transform: translateY(-4px); }
+}
+
+@keyframes crow-wing {
+  0%, 60%, 100% { transform: rotate(0); }
+  25%           { transform: rotate(-35deg); }
+  40%           { transform: rotate(10deg); }
+}
+
+/* ---------- Sun/moon toggle: faint and faceless ---------- */
+.theme-toggle {
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.theme-toggle svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: url(#wobble);
+  stroke: var(--line);
+  stroke-width: 1.6;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+
+.theme-toggle:hover .sun-disc,
+.theme-toggle:hover .moon-disc {
+  stroke-width: 2.4;
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.sun-disc { fill: var(--sun); }
+.sun-rays { fill: none; stroke-width: 1.4; opacity: 0.7; }
+.moon-disc { fill: var(--moon); stroke: #07080b; }
+.moon-crater { fill: var(--crater); stroke: #07080b; stroke-width: 1; }
 
 /* ---------- Buttons ---------- */
 .btn,
@@ -35,36 +168,40 @@
   inset: 0;
   z-index: -1;
   background: var(--card);
-  border: 2px solid var(--ink);
+  border: 2.5px solid var(--ink);
   border-radius: var(--rough-b);
   filter: url(#wobble);
-  box-shadow: 2px 3px 0 -1px var(--shade-1);
-  transition: transform 0.12s;
+  box-shadow: 3px 3px 0 0 var(--shade);
 }
 
-.btn:hover::before { transform: rotate(-1deg) scale(1.03); }
-.btn:active::before { transform: translate(1px, 2px); box-shadow: none; }
+.btn:hover::before { box-shadow: 4px 4px 0 0 var(--shade); }
+.btn:active::before { transform: translate(2px, 2px); box-shadow: none; }
 
 .btn:focus-visible,
 .nav-link:focus-visible,
+.link-btn:focus-visible,
 input:focus-visible {
-  outline: 2px dashed var(--accent);
-  outline-offset: 4px;
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
 }
 
-.btn.primary,
+/* Key buttons (Lock in, Settle up, Save, Add entry): the orange accent */
+.btn.primary {
+  color: #17130f;
+}
+
+.btn.primary::before {
+  background: var(--accent);
+  border-color: #17130f;
+}
+
+/* A picked stake: inked in */
 .btn.is-selected {
   color: var(--on-ink);
 }
 
-.btn.primary::before,
 .btn.is-selected::before {
   background: var(--ink);
-}
-
-.btn.is-selected::before {
-  transform: rotate(-2deg) scale(1.06);
-  background: var(--accent);
 }
 
 .btn:disabled {
@@ -72,14 +209,14 @@ input:focus-visible {
   opacity: 0.45;
 }
 
-.btn:disabled:hover::before { transform: none; }
+.btn:disabled:hover::before { box-shadow: 3px 3px 0 0 var(--shade); }
 
 .tag {
   font-size: 0.75em;
   padding: 0 6px;
   margin-left: 4px;
-  border: 1px dashed currentColor;
-  border-radius: 6px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
 }
 
 /* ---------- Sidebar links ---------- */
@@ -91,8 +228,8 @@ input:focus-visible {
 }
 
 .nav-link.is-active {
-  color: var(--accent);
-  text-decoration: underline wavy var(--accent) 1px;
+  color: var(--ink);
+  text-decoration: underline solid var(--ink) 3px;
   text-underline-offset: 6px;
 }
 
@@ -239,18 +376,23 @@ input:focus-visible {
   transform: rotate(-1.5deg);
 }
 
+/* The streak number: one of the three places orange is allowed */
 .streak-badge strong {
   font-size: 28px;
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 .penalty-notice {
   transform: rotate(0.6deg);
 }
 
+/* Solid ink, with a hatched strip down the left edge */
+.penalty-notice {
+  padding-left: 40px;
+}
+
 .penalty-notice::before {
-  border-color: var(--loss);
-  border-style: dashed;
+  background: var(--hatching) 0 0 / 16px 100% no-repeat, var(--card);
 }
 
 .penalty-notice strong,
@@ -284,8 +426,8 @@ input:focus-visible {
 }
 
 .popup::before {
-  border: 3px double var(--accent);
-  box-shadow: 6px 8px 0 -2px var(--shade-1), 0 0 0 9999px rgba(30, 20, 10, 0.18);
+  border: 4px double var(--ink);
+  box-shadow: 0 0 0 9999px rgba(10, 8, 6, 0.28);
 }
 
 .popup.is-leaving {
@@ -295,7 +437,7 @@ input:focus-visible {
 .popup-kicker {
   font-family: var(--font-head);
   font-style: italic;
-  color: var(--accent);
+  color: var(--ink-soft);
   letter-spacing: 2px;
   text-transform: uppercase;
   font-size: 14px;
@@ -355,30 +497,14 @@ input:focus-visible {
   color: var(--loss);
 }
 
-/* The suggested-bet button: same as a stake, with a dashed "pencil" outline */
-.stake-suggested {
-  border-style: dashed;
-}
-
-/* ---------- Day/night toggle (top right) ---------- */
-.theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.theme-toggle svg {
-  width: 20px;
-  height: 20px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.8;
-  stroke-linecap: round;
+/* The suggested-bet button: same as a stake, shaded with hatching */
+.stake-suggested::before {
+  background: var(--hatching), var(--card);
 }
 
 /* Night check-in: "you have more than your Diary says" */
 .income-warning {
-  border-left: 4px solid var(--accent);
+  border-left: 4px solid var(--ink);
   padding: 4px 0 4px 14px;
   margin: 6px 0 14px;
 }
@@ -388,8 +514,6 @@ input:focus-visible {
   margin: 26px auto 0;
   max-width: 520px;
   padding: 12px 18px;
-  border: 2px dashed var(--ink-soft);
-  border-radius: var(--rough-b);
   text-align: center;
   opacity: 0.85;
 }
@@ -410,7 +534,7 @@ input:focus-visible {
   font-size: 72px;
   line-height: 1;
   margin: 4px 0 !important;
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 .grid-card {
@@ -490,7 +614,7 @@ input:focus-visible {
 .sq-blank { visibility: hidden; }
 
 .sq-today {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ink);
   outline-offset: 1px;
   opacity: 1;
 }
@@ -545,13 +669,18 @@ input:focus-visible {
 
 .progress-fill {
   height: 100%;
-  background: repeating-linear-gradient(-45deg, var(--accent) 0 6px, transparent 6px 9px);
-  transition: width 0.6s ease;
+  background: repeating-linear-gradient(-45deg, var(--ink) 0 2px, transparent 2px 6px);
+  /* Fills from empty up to the width set inline */
+  animation: goal-fill 1s ease-out both;
+}
+
+@keyframes goal-fill {
+  from { width: 0; }
 }
 
 .goal-done {
   font-family: var(--font-head);
-  color: var(--accent);
+  color: var(--win);
 }
 
 .popup-big .popup-title {
@@ -583,7 +712,7 @@ input:focus-visible {
 }
 
 .link-btn:hover {
-  color: var(--accent);
+  color: var(--ink);
 }
 
 .inline-form {
@@ -606,8 +735,18 @@ input:focus-visible {
 .entries {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 4px 18px;
   width: min(100%, 560px);
+  box-sizing: border-box;
+}
+
+/* The entry list and its empty note sit on paper, like the cards, so the soil never shows behind text */
+.entries,
+.empty-note {
+  background: var(--card);
+  border: 2.5px solid var(--ink);
+  border-radius: var(--rough-a);
+  box-shadow: 6px 7px 0 0 var(--shade);
 }
 
 .entry {
@@ -616,7 +755,7 @@ input:focus-visible {
   gap: 12px;
   align-items: baseline;
   padding: 10px 6px;
-  border-bottom: 1.5px dashed var(--ink-soft);
+  border-bottom: 1px solid var(--ink-soft);
 }
 
 .entry-date {
@@ -637,6 +776,8 @@ input:focus-visible {
 
 .empty-note {
   max-width: 420px;
+  margin: 0;
+  padding: 14px 20px;
   text-align: center;
   font-style: italic;
   color: var(--ink-soft);
@@ -649,4 +790,26 @@ input:focus-visible {
   color: var(--on-ink);
   background: var(--loss);
   border-radius: var(--rough-b);
+}
+
+/* ---------- Reduced motion: everything appears in place ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .verdict-word,
+  .popup,
+  .popup.is-leaving,
+  .progress-fill {
+    animation: none;
+  }
+
+  .crow.is-hopping .crow-body,
+  .crow.is-hopping .crow-wing {
+    animation: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .theme-toggle {
+    width: 44px;
+    height: 44px;
+  }
 }
