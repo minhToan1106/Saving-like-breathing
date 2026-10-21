@@ -16,7 +16,7 @@
   --soot-far: #7c735f;
   --pine: #2c3a2b;
   --hatch: rgba(23, 19, 15, 0.55);
-  --sun: rgba(239, 233, 214, 0.7);
+  --sun: #e0b84a;
   --moon: #d8d2bd;
   --crater: #a7a08a;
   --window: #3f3226;
@@ -32,6 +32,20 @@
   --none: #b0a68e;
   --shade: rgba(23, 19, 15, 0.22);
   --crumple-opacity: 1;
+  /* The town as the streak grows: pines green a step at a time, muted moss and olive, lit windows */
+  --pine-1: #364832;
+  --pine-2: #44583a;
+  --moss: #6b7343;
+  --olive: #7d7a45;
+  --patch: #a8906a;
+  --castle: #7a705c;
+  --window-lit: #d4893a;
+  --window-glow: rgba(222, 140, 58, 0.45);
+  /* Buried treasure: dull gold, old bone, a dusty gem, chest wood */
+  --gold: #b8963f;
+  --bone: #d3c7a6;
+  --gem: #6b8580;
+  --wood: #6e5236;
 }
 
 /* Night: ink navy and near-black masses, cream ink, lit windows */
@@ -48,7 +62,7 @@
   --soot-far: #161b27;
   --pine: #0a110e;
   --hatch: rgba(0, 0, 0, 0.6);
-  --sun: rgba(239, 233, 214, 0.7);
+  --sun: #e0b84a;
   --moon: #d8d2bd;
   --crater: #a7a08a;
   --window: #e8873a;
@@ -64,6 +78,19 @@
   --none: #3b3f4a;
   --shade: rgba(0, 0, 0, 0.5);
   --crumple-opacity: 0.45;
+  /* Darker than they look: the paper overlay lifts dark greens at night */
+  --pine-1: #0d1511;
+  --pine-2: #111d15;
+  --moss: #222c1e;
+  --olive: #2c2d1c;
+  --patch: #3a3428;
+  --castle: #10131b;
+  --window-lit: #f2a24e;
+  --window-glow: rgba(242, 162, 78, 0.6);
+  --gold: #9c7b35;
+  --bone: #4a4740;
+  --gem: #2f4644;
+  --wood: #2a2018;
 }
 
 :root {

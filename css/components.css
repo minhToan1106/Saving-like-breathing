@@ -1,5 +1,6 @@
 /* Buttons, cards, inputs, the inked band, the sun/moon and the verdict.
-   Motion is kept to three moments: the win stamp, the goal bar filling, and the crow's hop. */
+   Motion is kept to four moments: the win stamp, the goal bar filling, the crow's hop,
+   and the town changing when the streak reaches a new stage. */
 
 /* ---------- Hook (in the band) ---------- */
 .hook {
@@ -27,11 +28,102 @@
 .scene-ink .window { fill: var(--window); stroke-width: 1.4; }
 .scene-ink .snag { fill: none; stroke: var(--soot); stroke-width: 4; }
 .scene-ink .root { fill: none; stroke: var(--root); stroke-width: 2.4; }
+.scene-ink .castle { fill: var(--castle); }
+.scene-ink .moss { fill: var(--moss); stroke-width: 1.6; }
+.scene-ink .olive { fill: var(--olive); stroke-width: 1.6; }
+.scene-ink .patch { fill: var(--patch); stroke-width: 1.4; }
+.scene-ink .door,
+.scene-ink .gate { fill: var(--line); stroke-width: 1.4; }
+.scene-ink .portcullis { fill: none; stroke: var(--soot-far); stroke-width: 1.6; }
+.scene-ink .grass,
+.scene-ink .brick,
+.scene-ink .flagpole { fill: none; stroke-width: 1.8; }
+.scene-ink .ivy { fill: none; stroke: var(--moss); stroke-width: 3.5; }
+.scene-ink .smoke { fill: none; stroke: var(--ink-soft); stroke-width: 1.6; opacity: 0.7; }
 
-/* Crumpled-paper clouds */
+/* ---------- The town grows with the streak ----------
+   js/scene.js puts stage-1 (7+ days), stage-2 (15+) or stage-3 (30+) on .scene;
+   each .grow group is shown only at the stages it lists. */
+.scene .grow { opacity: 0; }
+
+.scene:not(.stage-1, .stage-2, .stage-3) .at-0,
+.scene.stage-1 .at-1,
+.scene.stage-2 .at-2,
+.scene.stage-3 .at-3 {
+  opacity: 1;
+}
+
+.scene.stage-1 { --pine: var(--pine-1); }
+
+.scene.stage-2,
+.scene.stage-3 {
+  --pine: var(--pine-2);
+  --window: var(--window-lit);
+}
+
+.scene:is(.stage-2, .stage-3) .window {
+  filter: drop-shadow(0 0 3px var(--window-glow));
+}
+
+/* At 30 days the crow leaves the spire for the castle keep */
+.scene.stage-3 .crow { transform: translate(118.5px, 139px); }
+
+/* ---------- Buried treasure ----------
+   js/scene.js puts treasure-1 (25%+ of the monthly goal), treasure-2 (50%+), treasure-3 (80%+)
+   or treasure-4 (100%+) on .scene; each .dig group shows from the level it names. */
+/* The pocket stays outside the wobble filter: filtering shifts very dark fills, and it must match the soil */
+.scene-treasure .pocket { fill: var(--soil); }
+.scene-ink .stone { stroke-width: 1.6; }
+.scene-ink .gold { fill: var(--gold); stroke-width: 1.6; }
+.scene-ink .bone { fill: var(--bone); stroke-width: 1.6; }
+.scene-ink .fossil-line { fill: none; stroke-width: 1.2; }
+.scene-ink .gem { fill: var(--gem); stroke-width: 1.6; }
+.scene-ink .facet { fill: none; stroke-width: 1.2; }
+.scene-ink .wood { fill: var(--wood); stroke-width: 1.8; }
+.scene-treasure .brick { stroke-width: 1.6; }
+.scene-treasure .door { stroke-width: 1.2; }
+
+.scene .dig { opacity: 0; }
+
+.scene:is(.treasure-1, .treasure-2, .treasure-3, .treasure-4) .from-1,
+.scene:is(.treasure-2, .treasure-3, .treasure-4) .from-2,
+.scene:is(.treasure-3, .treasure-4) .from-3,
+.scene.treasure-4 .from-4 {
+  opacity: 1;
+}
+
+/* A stage or treasure change cross-fades once the page has drawn (is-ready), so opening the app doesn't animate */
+@media (prefers-reduced-motion: no-preference) {
+  .scene.is-ready :is(.grow, .dig) { transition: opacity 0.8s ease; }
+  .scene.is-ready :is(.pine, .window) { transition: fill 0.8s ease; }
+  .scene.is-ready .crow { transition: transform 1s ease-in-out; }
+}
+
+/* Crumpled-paper clouds, kept clear of the towers and trees.
+   Wide: one cloud rises above the crow's spire. Narrower, the town fills the sky on both sides,
+   so only one small cloud stays, between the hook and the streak badge. */
 .clouds { stroke: var(--line); stroke-width: 2; stroke-linejoin: miter; }
 .cloud { fill: var(--cloud); }
 .crease { fill: none; stroke-width: 1.2; opacity: 0.6; }
+.cloud-3 { transform: translateY(-70px); }
+
+/* Here the bigger sun reaches this cloud */
+@media (max-width: 1300px) {
+  .cloud-2 { display: none; }
+}
+
+@media (max-width: 1180px) {
+  .cloud-0, .cloud-2, .cloud-3 { display: none; }
+  .cloud-1 { transform: translate(240px, -92px); }
+}
+
+@media (max-width: 720px) {
+  .cloud-1 {
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: translate(240px, -118px) scale(0.75);
+  }
+}
 
 /* Ground and soil tiles */
 .soil-base { fill: var(--soil); }
@@ -63,6 +155,7 @@
 
 /* ---------- The crow on the tower: click and it hops once ---------- */
 .crow {
+  transform: translate(150px, 53px);
   cursor: pointer;
   outline: none;
   pointer-events: auto;
@@ -113,10 +206,10 @@
   40%           { transform: rotate(10deg); }
 }
 
-/* ---------- Sun/moon toggle: faint and faceless ---------- */
+/* ---------- Sun/moon toggle: a big muted-yellow sun, a cratered moon ---------- */
 .theme-toggle {
-  width: 56px;
-  height: 56px;
+  width: 88px;
+  height: 88px;
   padding: 0;
   border: 0;
   background: none;
@@ -145,7 +238,8 @@
 }
 
 .sun-disc { fill: var(--sun); }
-.sun-rays { fill: none; stroke-width: 1.4; opacity: 0.7; }
+.sun-shade { fill: url(#hatch); stroke: none; }
+.sun-rays { fill: none; stroke-width: 2.2; }
 .moon-disc { fill: var(--moon); stroke: #07080b; }
 .moon-crater { fill: var(--crater); stroke: #07080b; stroke-width: 1; }
 
@@ -195,12 +289,14 @@ input:focus-visible {
   border-color: #17130f;
 }
 
-/* A picked stake: inked in */
-.btn.is-selected {
+/* A picked stake (or the town preview being shown): inked in */
+.btn.is-selected,
+.btn[aria-pressed="true"] {
   color: var(--on-ink);
 }
 
-.btn.is-selected::before {
+.btn.is-selected::before,
+.btn[aria-pressed="true"]::before {
   background: var(--ink);
 }
 
@@ -516,6 +612,23 @@ input:focus-visible {
   padding: 12px 18px;
   text-align: center;
   opacity: 0.85;
+}
+
+.scene-preview {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.scene-preview .hint {
+  width: 100%;
+  margin: 0;
+}
+
+.scene-preview .btn {
+  padding: 4px 12px;
 }
 
 /* ---------- Streaks ---------- */

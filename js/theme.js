@@ -5,10 +5,13 @@
 window.BY = window.BY || {};
 
 (function (BY) {
-  // Faceless, scratchy sun and moon
+  // Faceless, scratchy sun (muted yellow, hatched on its lower right) and moon
   var SUN = '<svg viewBox="0 0 64 64" aria-hidden="true">' +
-    '<path class="sun-rays" d="M32 4v9M33 51v10M5 31h9M51 33h9M12 13l6 5M46 47l5 6M13 52l5-6M45 17l7-6"/>' +
-    '<path class="sun-disc" d="M32 15 44 19 49 31 45 44 32 49 20 45 15 33 19 20Z"/></svg>';
+    '<path class="sun-rays" d="M38.4 8.2 39.9 2.6 M49.2 14.8 51.2 12.8 M55.4 25.7 61.8 24 M55.2 38.2 58.8 39.2' +
+      ' M49.2 49.2 53.3 53.3 M38.3 55.7 39.1 58.7 M25.9 54.8 24.2 61 M14.5 49.5 12.6 51.4 M8.4 38.3 2.2 40' +
+      ' M8.4 25.7 5 24.8 M15.2 15.2 10.2 10.2 M25.8 8.9 24.8 5"/>' +
+    '<path class="sun-disc" d="M32 13 41.8 15 48.7 22.4 51.7 32 49.1 41.9 41.3 48.1 32 50.5 21.9 49.5 15.5 41.5 13 32 14.3 21.8 22.3 15.2Z"/>' +
+    '<path class="sun-shade" d="M48.7 22.4 51.7 32 49.1 41.9 41.3 48.1 32 50.5 21.9 49.5 15.5 41.5Z"/></svg>';
   var MOON = '<svg viewBox="0 0 64 64" aria-hidden="true">' +
     '<path class="moon-disc" d="M32 8 47 13 56 27 55 42 46 53 31 57 17 51 9 38 10 23 19 12Z"/>' +
     '<circle class="moon-crater" cx="24" cy="24" r="5"/><circle class="moon-crater" cx="40" cy="36" r="7"/>' +

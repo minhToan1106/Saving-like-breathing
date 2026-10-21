@@ -33,9 +33,10 @@
 }
 
 .main {
-  /* Where the ground line sits, and how wide the edge trees/town panels are */
+  /* Where the ground line sits, and how wide the edge trees/town panels are.
+     The panels stay in the space beside the 560px cards, so the town is never hidden. */
   --ground-y: 560px;
-  --edge-w: clamp(100px, 24vw, 360px);
+  --edge-w: clamp(100px, min(24cqw, (100cqw - 620px) / 2), 360px);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -50,6 +51,8 @@
   overflow: hidden;
   pointer-events: none;
   background: linear-gradient(var(--sky), var(--fog) var(--ground-y));
+  /* cqw in --edge-w means a share of the scene's width */
+  container-type: size;
 }
 
 .scene-sky {
@@ -82,10 +85,24 @@
   top: calc(var(--ground-y) - var(--edge-w) * 380 / 360);
   width: var(--edge-w);
   height: calc(var(--edge-w) * 1.5);
+  /* Leaves on the far tree may reach past the panel's edge */
+  overflow: visible;
 }
 
 .scene-left { left: 0; }
 .scene-right { right: 0; }
+
+/* Buried treasure: in the soil beside the cards, just below the left town's roots */
+.scene-treasure {
+  position: absolute;
+  top: calc(var(--ground-y) + var(--edge-w) * 160 / 360 + 24px);
+  /* As wide as fits in the soil beside the 560px cards, centered there */
+  --gutter: calc((100cqw - 560px) / 2);
+  --tw: min(240px, var(--gutter) - 16px);
+  left: calc((var(--gutter) - var(--tw)) / 2);
+  width: var(--tw);
+  aspect-ratio: 220 / 120;
+}
 
 /* Content sits above the scene; empty space lets clicks through to it (the crow) */
 .band,
@@ -118,7 +135,7 @@
   top: 16px;
   transform: translateX(-50%);
   width: max-content;
-  max-width: calc(100% - 150px);
+  max-width: calc(100% - 240px);
   pointer-events: none;
 }
 
@@ -154,6 +171,38 @@
   padding-top: 18px;
 }
 
+/* Narrower than this, the cards fill the middle and would hide the town.
+   The ground rises to the streak badge instead, and the town stands on either side of it.
+   The treasure has no soil left beside the cards, so it sits under the last card. */
+@media (max-width: 1180px) {
+  .main {
+    --ground-y: 236px;
+    --edge-w: clamp(96px, (100cqw - 220px) / 2, 190px);
+  }
+
+  .screen {
+    padding-bottom: 160px;
+  }
+
+  /* The town reaches up into the band here: the sun sits in the corner above the right pines */
+  .band .theme-slot {
+    top: 4px;
+    right: 4px;
+  }
+
+  .band .theme-toggle {
+    width: 72px;
+    height: 72px;
+  }
+
+  .scene-treasure {
+    top: auto;
+    bottom: 16px;
+    left: calc(50% - 110px);
+    width: 220px;
+  }
+}
+
 @media (max-width: 720px) {
   html, body { font-size: 17px; }
 
@@ -180,8 +229,8 @@
   }
 
   .main {
-    --ground-y: 440px;
-    --edge-w: clamp(96px, 26vw, 360px);
+    --ground-y: 164px;
+    --edge-w: clamp(84px, (100cqw - 150px) / 2, 150px);
   }
 
   .scene-sky {
@@ -194,12 +243,17 @@
 
   .band .hook {
     top: 10px;
-    max-width: calc(100% - 100px);
+    max-width: calc(100% - 150px);
   }
 
+  /* Flush with the edge (only ray tips reach it), clear of the crow on the spire */
   .band .theme-slot {
-    top: 8px;
-    right: 12px;
+    right: 0;
+  }
+
+  .band .theme-toggle {
+    width: 60px;
+    height: 60px;
   }
 
   .band .notice {

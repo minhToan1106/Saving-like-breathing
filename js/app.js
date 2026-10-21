@@ -19,6 +19,7 @@ window.BY = window.BY || {};
   function renderCurrent() {
     lastView = viewKey();
     if (BY.catchup.run(BY.state.data) && !BY.storage.saveData(BY.state.data)) showSaveWarning();
+    BY.scene.update(BY.state.data);
     SCREENS[BY.state.screen](BY.state.data);
   }
 

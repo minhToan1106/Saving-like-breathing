@@ -21,6 +21,7 @@
   <script src="js/dates.js"></script>
   <script src="js/rules.js"></script>
   <script src="js/catchup.js"></script>
+  <script src="js/scene.js"></script>
   <script>
     (function () {
       var R = BY.rules, D = BY.dates;
@@ -210,6 +211,27 @@
       g29['2026-10-05'] = day('win');
       check('The 30th win in a row earns the grand achievement', R.achievementsFor({ days: g29 }, '2026-10-05'), ['win', 'grand30']);
       check('The 29th does not', R.achievementsFor({ days: g29 }, '2026-10-04'), ['win']);
+
+      // ---- The town grows with the streak (js/scene.js) ----
+      var S = BY.scene;
+      check('Streaks 0 and 6 → stage 0 (crooked town)', [S.stageFor(0), S.stageFor(6)], [0, 0]);
+      check('Streaks 7 and 14 → stage 1 (repaired)', [S.stageFor(7), S.stageFor(14)], [1, 1]);
+      check('Streaks 15 and 29 → stage 2 (lit village)', [S.stageFor(15), S.stageFor(29)], [2, 2]);
+      check('Streaks 30 and 120 → stage 3 (castle)', [S.stageFor(30), S.stageFor(120)], [3, 3]);
+      check('A loss after 30 wins → streak 0 → back to stage 0',
+        S.stageFor(R.currentStreak({ days: Object.assign(R.demoDays('2026-10-05', 1000).days, { '2026-10-05': day('loss') }) })), 0);
+
+      // ---- Buried treasure grows with the monthly goal (js/scene.js) ----
+      check('0% and 24% → no treasure', [S.treasureFor(0), S.treasureFor(24)], [0, 0]);
+      check('25% and 49% → level 1 (gold nuggets)', [S.treasureFor(25), S.treasureFor(49)], [1, 1]);
+      check('50% and 79% → level 2 (more gold, a fossil)', [S.treasureFor(50), S.treasureFor(79)], [2, 2]);
+      check('80% and 99% → level 3 (gems)', [S.treasureFor(80), S.treasureFor(99)], [3, 3]);
+      check('100% and 150% → level 4 (open chest)', [S.treasureFor(100), S.treasureFor(150)], [4, 4]);
+      check('No goal set → 0%', [S.goalPercent({ amount: 0, saved: 5000 }), S.goalPercent(undefined)], [0, 0]);
+      check('$599.99 of $600 rounds down to 99% → no chest yet',
+        S.treasureFor(S.goalPercent({ amount: 60000, saved: 59999 })), 3);
+      check('Savings drop from $600 to $240 of $600 → chest back down to level 1',
+        [S.treasureFor(S.goalPercent({ amount: 60000, saved: 60000 })), S.treasureFor(S.goalPercent({ amount: 60000, saved: 24000 }))], [4, 1]);
 
       // ---- Show results ----
       var list = document.getElementById('results');

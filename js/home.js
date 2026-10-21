@@ -4,6 +4,10 @@ window.BY = window.BY || {};
 
 (function (BY) {
   var STAKES = [200, 300, 500, 1000];
+  // Streaks the Demo card can preview the town at (one per stage),
+  // and shares of the monthly goal it can preview the buried treasure at (one per level)
+  var PREVIEWS = [7, 15, 30];
+  var TREASURE_PREVIEWS = [25, 50, 80, 100];
   var BALANCE_ERROR = 'Enter your balance as a number, like 48.50';
 
   // What the user has picked but not confirmed yet
@@ -38,8 +42,26 @@ window.BY = window.BY || {};
         '<p class="eyebrow">Demo</p>' +
         '<button type="button" class="btn" id="skip-30">Skip to 30 days of success <span class="tag">demo</span></button>' +
         '<p class="hint">Fills the last 30 days with sample wins so the big achievements can be shown.</p>' +
+        '<div class="scene-preview" role="group" aria-labelledby="preview-label">' +
+          '<p class="hint" id="preview-label">See how the town grows with a longer streak. Only the picture changes.</p>' +
+          PREVIEWS.map(function (n) {
+            return '<button type="button" class="btn" data-preview="' + n + '">' + n + ' days</button>';
+          }).join('') +
+          '<button type="button" class="btn" data-preview="">Your streak</button>' +
+        '</div>' +
+        '<div class="scene-preview" role="group" aria-labelledby="treasure-label">' +
+          '<p class="hint" id="treasure-label">See what\'s buried as you get closer to your monthly goal. Only the picture changes.</p>' +
+          TREASURE_PREVIEWS.map(function (n) {
+            return '<button type="button" class="btn" data-preview="' + n + '">' + n + '%</button>';
+          }).join('') +
+          '<button type="button" class="btn" data-preview="">Your savings</button>' +
+        '</div>' +
       '</div>';
     play.querySelector('#skip-30').addEventListener('click', function () { skipThirtyDays(data); });
+    BY.scene.update(data);
+    var previews = play.querySelectorAll('.scene-preview');
+    wirePreview(previews[0], BY.scene.preview, BY.scene.previewing);
+    wirePreview(previews[1], BY.scene.previewTreasure, BY.scene.previewingTreasure);
     var root = play.querySelector('#home-card');
     renderGoal(play.querySelector('#home-goal'), data, day);
 
@@ -353,6 +375,26 @@ window.BY = window.BY || {};
       });
       save(data);
     }
+  }
+
+  // ---------- Demo: preview the town at 7, 15 and 30 days, or the treasure at 25-100% ----------
+  // preview(value or null) shows it; previewing() says what's shown (null = the real one)
+  function wirePreview(group, preview, previewing) {
+    var buttons = group.querySelectorAll('[data-preview]');
+    function mark() {
+      var shown = previewing();
+      buttons.forEach(function (b) {
+        var value = b.dataset.preview === '' ? null : Number(b.dataset.preview);
+        b.setAttribute('aria-pressed', String(value === shown));
+      });
+    }
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () {
+        preview(b.dataset.preview === '' ? null : Number(b.dataset.preview));
+        mark();
+      });
+    });
+    mark();
   }
 
   // ---------- Demo: 30 days of success ----------
