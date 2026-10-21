@@ -24,6 +24,22 @@ Your data stays in your browser on this device (`localStorage`). Nothing is sent
 - **Savings:** each win adds what you didn't spend, counted only up to the suggested bet, so a huge bet can't fake your savings.
 - **Streaks:** a full-year grid of wins (green), losses (red), and missed days. A missed check-in counts as a loss.
 - **Day/night:** the toggle at the top right switches between the sepia day look and the dark night look, and remembers your choice.
+- **The town** behind the app grows with your streak: crooked at first, repaired from **7** days, a lit village from **15**, a castle from **30**. A loss resets the streak to 0, so the town goes back to the start.
+- **Buried treasure** under the town grows with the share of this month's saving goal you've saved: gold nuggets from 25%, more gold and a fossil from 50%, gems from 80%, an open chest at 100%.
+- **Demo card** (on Home): **7 / 15 / 30 days** preview the town, **25% / 50% / 80% / 100%** preview the treasure. **Your streak** and **Your savings** go back to the real picture. A preview only changes the picture and is never saved.
+
+## Animations
+
+Made with [GSAP](https://gsap.com). Each one plays once; nothing loops.
+
+- The town rebuilds when the streak reaches a new stage, and new treasure rises out of the soil.
+- The goal bar grows from its last value.
+- Achievements stamp in over a dimmed page with a warm glow (stronger for 30 days and goal reached).
+- A small inked flame by the streak number flares when the streak goes up.
+
+If your system is set to reduce motion, everything appears in its final state instantly.
+
+`gsap.min.js` is bundled in `js/vendor/` under GSAP's free Standard License (see the header in the file). There's no npm and no CDN, so the app still opens offline by double-clicking `index.html`.
 
 ## Reset to a fresh start
 
@@ -32,10 +48,15 @@ Press **F12** → **Console**, type `localStorage.clear()`, press Enter, and ref
 ## Demo (about 1 minute)
 
 1. Reset. Open **Diary** and enter **300** as the money you have this month.
-2. On **Home**, tap **Suggested $10.00** → **Lock in the stakes** → **Skip to tonight** (demo button) → enter **298** → **Settle up**. You win, an achievement pops up, and the streak becomes 1.
-3. Show the **Diary** and the **Streaks** grid.
-4. Set the monthly goal to **100** → tap **Skip to 30 days of success** (demo button). The 30-day and monthly achievements pop up, and Streaks fills with green.
-5. Flip the **Night** toggle at the top right.
+2. On **Home**, tap **Suggested $10.00** → **Lock in the stakes** → **Skip to tonight** (demo button) → enter **298** → **Settle up**. You win, an achievement pops up, the flame flares, and the streak becomes 1.
+3. On the **Demo** card, tap **7 days**, **15 days**, **30 days** to watch the town grow, then **Your streak**.
+4. Tap **25%**, **50%**, **80%**, **100%** to dig up the treasure, then **Your savings**.
+5. Set the monthly goal to **100** → tap **Skip to 30 days of success**. The 30-day and monthly achievements pop up, the goal bar fills, and the real town becomes a castle.
+6. Show the **Streaks** grid, then flip the **Night** toggle at the top right.
+
+## Known issues
+
+- Streaks screen is wider than the screen on phones.
 
 ## Checking the math
 
@@ -46,4 +67,7 @@ Open `tests.html` in the same way. It runs the product's examples against the ru
 - `index.html`: the page. `css/` holds the look; `js/` holds the app.
 - `js/rules.js`: all the money math (verdict, penalty, streak, savings, suggested bet).
 - `js/storage.js`: the only file that reads or writes saved data.
+- `js/scene.js`: the town and treasure stages, and their animations.
+- `js/motion.js`: decides when to animate (GSAP loaded, reduced motion off).
+- `js/vendor/gsap.min.js`: the bundled GSAP library.
 - `devpost/`: the planning documents (scope, product requirements, technical spec, build checklist).
