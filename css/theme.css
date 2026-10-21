@@ -1,6 +1,6 @@
 /* Fonts, colors, crumpled paper and scratchy ink edges.
    Every color is a variable, so the sun/moon toggle can swap the whole look.
-   Orange is kept for three things only: lit windows, key buttons and the streak number. */
+   Orange is kept for three things only: lit windows, key buttons and the streak number with its flame. */
 
 :root,
 [data-theme="day"] {
@@ -41,6 +41,13 @@
   --castle: #7a705c;
   --window-lit: #d4893a;
   --window-glow: rgba(222, 140, 58, 0.45);
+  /* Achievement pop-ups: a lamplight halo (stronger for the big ones) over a slightly dimmed page */
+  --popup-glow: rgba(214, 133, 52, 0.5);
+  --popup-glow-strong: rgba(214, 133, 52, 0.78);
+  --popup-dim: rgba(23, 19, 15, 0.3);
+  /* The streak flame: muted orange with a pale core */
+  --flame: #c97c3f;
+  --flame-core: #ecd3a0;
   /* Buried treasure: dull gold, old bone, a dusty gem, chest wood */
   --gold: #b8963f;
   --bone: #d3c7a6;
@@ -87,6 +94,11 @@
   --castle: #10131b;
   --window-lit: #f2a24e;
   --window-glow: rgba(242, 162, 78, 0.6);
+  --popup-glow: rgba(242, 162, 78, 0.38);
+  --popup-glow-strong: rgba(242, 162, 78, 0.62);
+  --popup-dim: rgba(0, 0, 0, 0.45);
+  --flame: #d68a4c;
+  --flame-core: #f0cf92;
   --gold: #9c7b35;
   --bone: #4a4740;
   --gem: #2f4644;

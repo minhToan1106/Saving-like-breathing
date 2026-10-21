@@ -92,9 +92,9 @@
   opacity: 1;
 }
 
-/* A stage or treasure change cross-fades once the page has drawn (is-ready), so opening the app doesn't animate */
+/* A stage or treasure change animates once the page has drawn (is-ready), so opening the app doesn't.
+   js/scene.js moves the .grow and .dig groups with GSAP; colors and the crow ease here. */
 @media (prefers-reduced-motion: no-preference) {
-  .scene.is-ready :is(.grow, .dig) { transition: opacity 0.8s ease; }
   .scene.is-ready :is(.pine, .window) { transition: fill 0.8s ease; }
   .scene.is-ready .crow { transition: transform 1s ease-in-out; }
 }
@@ -478,6 +478,21 @@ input:focus-visible {
   color: var(--accent-ink);
 }
 
+/* A small inked flame beside it, only while the streak is 1 or more.
+   js/home.js flares it once on a new streak; otherwise it stands still. */
+.streak-flame {
+  width: 20px;
+  height: 27px;
+  margin: 0 3px 0 2px;
+  vertical-align: -4px;
+  overflow: visible;
+}
+
+.streak-flame .flame-fill { fill: var(--flame); }
+.streak-flame .flame-hatch { fill: none; stroke: var(--hatch); stroke-width: 1.1; }
+.streak-flame .flame-core { fill: var(--flame-core); stroke: var(--ink); stroke-width: 1.1; stroke-linejoin: round; }
+.streak-flame .flame-outline { fill: none; stroke: var(--ink); stroke-width: 1.7; stroke-linejoin: round; }
+
 .penalty-notice {
   transform: rotate(0.6deg);
 }
@@ -496,38 +511,68 @@ input:focus-visible {
   color: var(--loss);
 }
 
-/* ---------- Achievement pop-ups ---------- */
+/* ---------- Achievement pop-ups ----------
+   js/achievements.js stamps each card in and out with GSAP and fades the dim layer;
+   the styles here are the settled state, which is all reduced motion shows. */
+.popup-dim {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  background: var(--popup-dim);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
 .popups {
   position: fixed;
   top: 18vh;
-  left: 50%;
+  left: 0;
+  right: 0;
   z-index: 10;
-  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  padding: 0 16px;
   pointer-events: none;
 }
 
 .popup {
   pointer-events: auto;
   display: grid;
-  gap: 4px;
-  min-width: 260px;
-  padding: 20px 30px;
+  gap: 6px;
+  box-sizing: border-box;
+  min-width: min(340px, 100%);
+  max-width: 100%;
+  padding: 26px 40px;
   font: inherit;
   color: var(--ink);
   text-align: center;
   background: none;
   border: 0;
   cursor: pointer;
-  animation: popup-stamp 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  transform: rotate(-3deg);
 }
 
 .popup::before {
   border: 4px double var(--ink);
-  box-shadow: 0 0 0 9999px rgba(10, 8, 6, 0.28);
 }
 
-.popup.is-leaving {
-  animation: popup-fade 0.4s ease-in both;
+/* A soft lamplight halo around the card, behind its paper: a blurred patch of light,
+   so it stays soft-edged while it swells */
+.popup-glow {
+  position: absolute;
+  inset: -12px;
+  z-index: -3;
+  background: var(--popup-glow);
+  filter: blur(20px);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.popup-big .popup-glow {
+  inset: -22px;
+  background: var(--popup-glow-strong);
+  filter: blur(30px);
 }
 
 .popup-kicker {
@@ -536,27 +581,18 @@ input:focus-visible {
   color: var(--ink-soft);
   letter-spacing: 2px;
   text-transform: uppercase;
-  font-size: 14px;
+  font-size: 18px;
 }
 
 .popup-title {
   font-family: var(--font-head);
-  font-size: 30px;
+  font-size: clamp(30px, 9vw, 39px);
   line-height: 1.1;
 }
 
 .popup-sub {
   color: var(--ink-soft);
-}
-
-@keyframes popup-stamp {
-  from { transform: scale(2) rotate(-14deg); opacity: 0; }
-  to   { transform: scale(1) rotate(-3deg); opacity: 1; }
-}
-
-@keyframes popup-fade {
-  from { transform: scale(1) rotate(-3deg); opacity: 1; }
-  to   { transform: scale(0.9) rotate(-3deg) translateY(-20px); opacity: 0; }
+  font-size: 1.25em;
 }
 
 /* ---------- Screen headings ---------- */
@@ -783,12 +819,7 @@ input:focus-visible {
 .progress-fill {
   height: 100%;
   background: repeating-linear-gradient(-45deg, var(--ink) 0 2px, transparent 2px 6px);
-  /* Fills from empty up to the width set inline */
-  animation: goal-fill 1s ease-out both;
-}
-
-@keyframes goal-fill {
-  from { width: 0; }
+  /* js/home.js grows it from its last width to the width set inline */
 }
 
 .goal-done {
@@ -797,7 +828,7 @@ input:focus-visible {
 }
 
 .popup-big .popup-title {
-  font-size: 1.5em;
+  font-size: clamp(32px, 10vw, 46px);
 }
 
 /* Home's read-only "Money you have" (from the Diary) */
@@ -907,10 +938,7 @@ input:focus-visible {
 
 /* ---------- Reduced motion: everything appears in place ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .verdict-word,
-  .popup,
-  .popup.is-leaving,
-  .progress-fill {
+  .verdict-word {
     animation: none;
   }
 

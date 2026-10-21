@@ -14,6 +14,23 @@ window.BY = window.BY || {};
   var ui = { stake: null, custom: false, suggested: false };
   // The night balance typed so far, kept if the user goes to the Diary to log income
   var nightDraft = '';
+  // The goal bar's last fill, so it grows from there instead of from empty on every render
+  var shownPct = null;
+  // The streak the flame last flared for. Kept for this browser tab only, never in the saved data,
+  // so switching screens or re-rendering doesn't replay it; a new tab flares it once.
+  var FLAME_KEY = 'by-flame-streak';
+  var flamed = readFlamed();
+
+  // A small inked flame beside the streak number: filled, hatched inside its outline, a pale core, then inked
+  var FLAME_PATH = 'M12 30.5C6.2 30.6 3.4 26.4 3.9 21.6 4.3 17.4 7.6 15.1 7.9 10.4 10.6 12.3 11.6 14.6 11.3 17.2 13.6 14.8 14.6 10.2 12.6 2.5 17.9 6.4 21.2 12.6 20.7 19.4 20.4 25.9 17.2 30.4 12 30.5Z';
+  var FLAME =
+    '<svg class="streak-flame" viewBox="0 0 24 32" aria-hidden="true" focusable="false">' +
+      '<defs><clipPath id="flame-clip"><path d="' + FLAME_PATH + '"/></clipPath></defs>' +
+      '<path class="flame-fill" d="' + FLAME_PATH + '"/>' +
+      '<path class="flame-hatch" clip-path="url(#flame-clip)" d="M0 20 9 11M0 25 13 12M1 30 17 14M5 32 21 16M10 33 24 19M15 33 24 24"/>' +
+      '<path class="flame-core" d="M12.1 28.4C9.4 28.5 8.2 26.4 8.7 24.1 9.1 22.2 10.8 21.3 11.2 19.2 13.4 20.6 15.1 23 15 25.1 14.9 27.1 13.8 28.4 12.1 28.4Z"/>' +
+      '<path class="flame-outline" d="' + FLAME_PATH + '"/>' +
+    '</svg>';
 
   function money(cents) {
     return BY.rules.formatMoney(cents);
@@ -34,7 +51,8 @@ window.BY = window.BY || {};
     var streak = BY.rules.currentStreak(data);
 
     play.innerHTML =
-      '<p class="streak-badge sketch">Streak: <strong id="home-streak">' + streak + '</strong>' +
+      '<p class="streak-badge sketch">Streak: ' + (streak > 0 ? FLAME : '') +
+        '<strong id="home-streak">' + streak + '</strong>' +
         (streak === 1 ? ' day' : ' days') + '</p>' +
       '<div id="home-card" class="home-card"></div>' +
       '<div id="home-goal" class="home-card"></div>' +
@@ -58,6 +76,7 @@ window.BY = window.BY || {};
         '</div>' +
       '</div>';
     play.querySelector('#skip-30').addEventListener('click', function () { skipThirtyDays(data); });
+    flareIfNew(play.querySelector('.streak-flame'), streak);
     BY.scene.update(data);
     var previews = play.querySelectorAll('.scene-preview');
     wirePreview(previews[0], BY.scene.preview, BY.scene.previewing);
@@ -74,6 +93,39 @@ window.BY = window.BY || {};
     } else {
       renderVerdict(root, day);
     }
+  }
+
+  // ---------- Streak flame ----------
+  function readFlamed() {
+    try {
+      var v = sessionStorage.getItem(FLAME_KEY);
+      return v === null ? null : Number(v);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Flares on the first Home of this tab or when the streak went up; any other render shows it still
+  function flareIfNew(flame, streak) {
+    var flare = streak > 0 && (flamed === null || streak > flamed);
+    if (streak !== flamed) {
+      flamed = streak;
+      try { sessionStorage.setItem(FLAME_KEY, String(streak)); } catch (e) { /* the in-memory flag still works */ }
+    }
+    if (!flare || !BY.motion.on()) return;
+    // Grows from a spark at its base, flickers a few times, then stands still
+    gsap.timeline()
+      .fromTo(flame, { scale: 0.2, autoAlpha: 0, transformOrigin: '50% 100%' },
+        { scale: 1, autoAlpha: 1, duration: 0.5, ease: 'power2.out' })
+      .to(flame, {
+        keyframes: [
+          { scaleX: 0.94, scaleY: 1.12, rotation: -4 },
+          { scaleX: 1.04, scaleY: 0.95, rotation: 3 },
+          { scaleX: 0.98, scaleY: 1.05, rotation: -1.5 },
+          { scaleX: 1, scaleY: 1, rotation: 0 }
+        ],
+        duration: 0.7, ease: 'none', easeEach: 'sine.inOut'
+      });
   }
 
   // ---------- 1. Before the bet ----------
@@ -445,6 +497,13 @@ window.BY = window.BY || {};
           '<button type="button" class="btn" id="set-goal" disabled>Set goal</button>' +
         '</div>' +
       '</div>';
+
+    // The fill grows from where it was last shown (empty on the first Home); unchanged, it stays put
+    var fill = root.querySelector('#goal-fill');
+    if (fill && pct !== shownPct && BY.motion.on()) {
+      gsap.fromTo(fill, { width: (shownPct || 0) + '%' }, { width: pct + '%', duration: 0.9, ease: 'power2.out' });
+    }
+    shownPct = pct;
 
     var input = root.querySelector('#goal-amount');
     var btn = root.querySelector('#set-goal');
